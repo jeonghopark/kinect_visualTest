@@ -1,10 +1,12 @@
 #include "ofApp.h"
 
+
+
 //--------------------------------------------------------------
 void ofApp::setup() {
     ofSetLogLevel(OF_LOG_VERBOSE);
     
-    ofBackground(255);
+    ofBackground(0);
 
     // enable depth->video image calibration
     kinect.setRegistration(true);
@@ -41,15 +43,18 @@ void ofApp::setup() {
     angle = 0;
     kinect.setCameraTiltAngle(angle);
     
-    // start from the front
-    bDrawPointCloud = false;
+
 }
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::update() {
     
     
     kinect.update();
+    
     
     // there is a new frame and we are connected
     if(kinect.isFrameNew()) {
@@ -86,6 +91,7 @@ void ofApp::update() {
 
 
 
+
 //--------------------------------------------------------------
 void ofApp::draw() {
     
@@ -93,9 +99,8 @@ void ofApp::draw() {
     
     
     easyCam.begin();
-    if (bDrawPointCloud) {
-        drawPointCloud();
-    }
+    drawPointCloud.drawPointCloud(kinect);
+    drawPointCloud.drawLinesCloud(kinect);
     easyCam.end();
     
     
@@ -103,29 +108,7 @@ void ofApp::draw() {
     
     ofSetColor(255, 255, 255);
     
-    ofImage _transImg;
-    _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
-    
-    ofPixels & pix = grayImage.getPixels();
-    ofPixels & pixT = _transImg.getPixels();
-    int numPixels = pix.size();
-    for(int i = 0; i < numPixels; i++) {
-        if(pix[i] == 255) {
-            pixT[i*4+0] = 0;
-            pixT[i*4+1] = 0;
-            pixT[i*4+2] = 0;
-            pixT[i*4+3] = 255;
-        } else {
-            pixT[i*4+0] = pix[i];
-            pixT[i*4+1] = 255;
-            pixT[i*4+2] = 255;
-            pixT[i*4+3] = 0;
-        }
-    }
-    
-    _transImg.update();
-    _transImg.draw(0, 0, 1024, 768);
-    
+    drawTransImg(grayImage);
     
     
     if (bContourDraw) {
@@ -142,7 +125,47 @@ void ofApp::draw() {
     }
     
     
+    ofDrawBitmapString(ofToString(ofGetFrameRate(),2), 10, 10);
+    
+    
 }
+
+
+
+
+
+
+//--------------------------------------------------------------
+void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
+ 
+    ofImage _transImg;
+    _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+    
+    ofPixels & pix = _img.getPixels();
+    ofPixels & pixT = _transImg.getPixels();
+    int numPixels = pix.size();
+    for(int i = 0; i < numPixels; i++) {
+        if(pix[i] == 255) {
+            pixT[i*4+0] = 255;
+            pixT[i*4+1] = 0;
+            pixT[i*4+2] = 0;
+            pixT[i*4+3] = 255;
+        } else {
+            pixT[i*4+0] = pix[i];
+            pixT[i*4+1] = 255;
+            pixT[i*4+2] = 255;
+            pixT[i*4+3] = 0;
+        }
+    }
+    
+    _transImg.update();
+    _transImg.draw(0, 0);
+
+    
+}
+
+
+
 
 
 //--------------------------------------------------------------
@@ -167,31 +190,11 @@ void ofApp::information(){
 }
 
 
-//--------------------------------------------------------------
-void ofApp::drawPointCloud() {
-    int w = 640;
-    int h = 480;
-    ofMesh mesh;
-    mesh.setMode(OF_PRIMITIVE_POINTS);
-    int step = 2;
-    for(int y = 0; y < h; y += step) {
-        for(int x = 0; x < w; x += step) {
-            if(kinect.getDistanceAt(x, y) > 0) {
-                mesh.addColor(kinect.getColorAt(x,y));
-                mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
-            }
-        }
-    }
-    glPointSize(3);
-    ofPushMatrix();
-    // the projected points are 'upside down' and 'backwards'
-    ofScale(1, -1, -1);
-    ofTranslate(0, 0, -1000); // center the points a bit
-    ofEnableDepthTest();
-    mesh.drawVertices();
-    ofDisableDepthTest();
-    ofPopMatrix();
-}
+
+
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::exit() {
@@ -209,7 +212,7 @@ void ofApp::keyPressed (int key) {
             break;
             
         case'p':
-            bDrawPointCloud = !bDrawPointCloud;
+            drawPointCloud.bDrawPointCloud = !drawPointCloud.bDrawPointCloud;
             break;
             
         case '>':
@@ -242,7 +245,10 @@ void ofApp::keyPressed (int key) {
         case 'c':
             bContourDraw = !bContourDraw;
             break;
-            
+
+        case 'l':
+            drawPointCloud.bLinesPointCloud = !drawPointCloud.bLinesPointCloud;
+            break;
             
         case '1':
             kinect.setLed(ofxKinect::LED_GREEN);

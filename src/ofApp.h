@@ -4,6 +4,8 @@
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
 
+#include "DrawPointCloud.hpp"
+
 class ofApp : public ofBaseApp {
 public:
 	
@@ -11,8 +13,6 @@ public:
 	void update();
 	void draw();
 	void exit();
-	
-	void drawPointCloud();
 	
 	void keyPressed(int key);
 	void mouseDragged(int x, int y, int button);
@@ -33,7 +33,6 @@ public:
 	ofxCvContourFinder contourFinder;
 	
 	bool bThreshWithOpenCV;
-	bool bDrawPointCloud;
 	
 	int nearThreshold;
 	int farThreshold;
@@ -47,7 +46,12 @@ public:
     void information();
     
     
+    DrawPointCloud drawPointCloud;
+    
     bool bContourDraw;
     
+    void drawTransImg(ofxCvGrayscaleImage _img);
+    
+
     
 };
