@@ -27,20 +27,17 @@ void DrawPointCloud::drawPointCloud(ofxKinect & kinect) {
     int w = 640;
     int h = 480;
     
-    auto kinectT = new ofxKinect;
-    kinectT = &kinect;
-    
     if (bDrawPointCloud) {
         
         ofMesh mesh;
         mesh.setMode(OF_PRIMITIVE_POINTS);
         
-        int step = 4;
+        int step = 2;
         for(int y = 0; y < h; y += step) {
             for(int x = 0; x < w; x += step) {
-                if(kinectT->getDistanceAt(x, y) > 0) {
-                    mesh.addColor(kinectT->getColorAt(x,y));
-                    mesh.addVertex(kinectT->getWorldCoordinateAt(x, y));
+                if(kinect.getDistanceAt(x, y) > 0) {
+                    mesh.addColor(kinect.getColorAt(x,y));
+                    mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
                 }
             }
         }
@@ -68,21 +65,17 @@ void DrawPointCloud::drawLinesCloud(ofxKinect & kinect) {
     int w = 640;
     int h = 480;
     
-    auto kinectT = new ofxKinect;
-    kinectT = &kinect;
-
-    
     if (bLinesPointCloud) {
         
         ofMesh mesh;
         mesh.setMode(OF_PRIMITIVE_LINES);
         
-        int step = 4;
+        int step = 2;
         for(int y = 0; y < h; y += step) {
             for(int x = 0; x < w; x += step) {
-                if(kinectT->getDistanceAt(x, y) > 0) {
-                    mesh.addColor(kinectT->getColorAt(x,y));
-                    mesh.addVertex(kinectT->getWorldCoordinateAt(x, y));
+                if(kinect.getDistanceAt(x, y) > 0) {
+                    mesh.addColor(kinect.getColorAt(x,y));
+                    mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
                 }
             }
         }
