@@ -17,7 +17,8 @@
 
 class DrawPointCloud {
     
-
+//    ofxKinect kinectT;
+    
 public:
     
     DrawPointCloud();
