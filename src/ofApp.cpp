@@ -27,7 +27,6 @@ void ofApp::setup() {
         ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
     }
     
-    
     colorImg.allocate(kinect.width, kinect.height);
     grayImage.allocate(kinect.width, kinect.height);
     grayThreshNear.allocate(kinect.width, kinect.height);
@@ -55,8 +54,6 @@ void ofApp::update() {
     
     kinect.update();
     
-    
-    // there is a new frame and we are connected
     if(kinect.isFrameNew()) {
         
         grayImage.setFromPixels(kinect.getDepthPixels());
@@ -68,8 +65,6 @@ void ofApp::update() {
             grayThreshFar.threshold(farThreshold);
             cvAnd(grayThreshNear.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
         } else {
-            
-            // or we do it ourselves - show people how they can work with the pixels
             ofPixels & pix = grayImage.getPixels();
             int numPixels = pix.size();
             for(int i = 0; i < numPixels; i++) {
@@ -104,21 +99,30 @@ void ofApp::draw() {
     easyCam.end();
     
     
-    ofPushStyle();
-    
-    ofSetColor(255, 255, 255);
-    
     drawTransImg(grayImage);
+
     
+
     
     if (bContourDraw) {
-        ofPushMatrix();
         //    ofRotateXDeg(180);
-        contourFinder.draw(0, 0, ofGetWidth(), ofGetHeight());
-        ofPopMatrix();
-        
+        contourFinder.draw(0, 0);
+    }
+    
+    
+    if (contourFinder.blobs.size()>0 && bContourDraw) {
+        ofPushStyle();
+        ofNoFill();
+        vector<ofxCvBlob> _b = contourFinder.blobs;
+        for (int j=0; j<_b.size(); j++) {
+            vector<ofPoint> _p = _b[j].pts;
+            for (int i=0; i<_p.size(); i++) {
+                ofDrawCircle(_p[i], 10);
+            }
+        }
         ofPopStyle();
     }
+
     
     if (bInformation){
         information();
@@ -139,6 +143,7 @@ void ofApp::draw() {
 void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
  
     ofImage _transImg;
+    
     _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
     
     ofPixels & pix = _img.getPixels();
