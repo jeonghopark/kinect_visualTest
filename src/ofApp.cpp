@@ -8,18 +8,11 @@ void ofApp::setup() {
     
     ofBackground(0);
 
-    // enable depth->video image calibration
     kinect.setRegistration(true);
     
     kinect.init();
-    //kinect.init(true); // shows infrared instead of RGB video image
-    //kinect.init(false, false); // disable video image (faster fps)
-    
     kinect.open();		// opens first available kinect
-    //kinect.open(1);	// open a kinect by id, starting with 0 (sorted by serial # lexicographically))
-    //kinect.open("A00362A08602047A");	// open a kinect using it's unique serial #
-    
-    // print the intrinsic IR sensor values
+
     if(kinect.isConnected()) {
         ofLogNotice() << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm";
         ofLogNotice() << "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm";
@@ -38,7 +31,6 @@ void ofApp::setup() {
     
     ofSetFrameRate(60);
     
-    // zero the tilt on startup
     angle = 0;
     kinect.setCameraTiltAngle(angle);
     
@@ -50,7 +42,6 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::update() {
-    
     
     kinect.update();
     
