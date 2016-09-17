@@ -4,6 +4,7 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    
     ofSetLogLevel(OF_LOG_VERBOSE);
     
     ofBackground(0);
@@ -11,15 +12,8 @@ void ofApp::setup() {
     kinect.setRegistration(true);
     
     kinect.init();
-    kinect.open();		// opens first available kinect
+    kinect.open();
 
-    if(kinect.isConnected()) {
-        ofLogNotice() << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm";
-        ofLogNotice() << "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm";
-        ofLogNotice() << "zero plane pixel size: " << kinect.getZeroPlanePixelSize() << "mm";
-        ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
-    }
-    
     colorImg.allocate(kinect.width, kinect.height);
     grayImage.allocate(kinect.width, kinect.height);
     grayThreshNear.allocate(kinect.width, kinect.height);
@@ -34,7 +28,6 @@ void ofApp::setup() {
     angle = 0;
     kinect.setCameraTiltAngle(angle);
     
-
 }
 
 
@@ -93,10 +86,7 @@ void ofApp::draw() {
     drawTransImg(grayImage);
 
     
-
-    
     if (bContourDraw) {
-        //    ofRotateXDeg(180);
         contourFinder.draw(0, 0);
     }
     
@@ -167,7 +157,6 @@ void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
 //--------------------------------------------------------------
 void ofApp::information(){
     
-    // draw instructions
     ofSetColor(255, 255, 255);
     stringstream reportStream;
     
@@ -194,7 +183,7 @@ void ofApp::information(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    kinect.setCameraTiltAngle(0); // zero the tilt on exit
+    kinect.setCameraTiltAngle(0);
     kinect.close();
 }
 
@@ -290,35 +279,31 @@ void ofApp::keyPressed (int key) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button)
-{
+void ofApp::mouseDragged(int x, int y, int button) {
     
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button)
-{
+void ofApp::mousePressed(int x, int y, int button) {
     
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button)
-{
+void ofApp::mouseReleased(int x, int y, int button) {
     
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
+void ofApp::mouseEntered(int x, int y) {
     
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+void ofApp::mouseExited(int x, int y) {
     
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h)
-{
+void ofApp::windowResized(int w, int h) {
     
 }
