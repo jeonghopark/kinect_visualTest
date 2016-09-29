@@ -33,8 +33,10 @@ void ofApp::setup() {
 
 
 
+
 //--------------------------------------------------------------
 void ofApp::update() {
+    
     
     kinect.update();
     
@@ -66,6 +68,7 @@ void ofApp::update() {
         contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
     }
     
+    
 }
 
 
@@ -83,8 +86,9 @@ void ofApp::draw() {
     easyCam.end();
     
     
-    drawTransImg(grayImage);
+    kinect.draw(0, 0);
 
+    drawTransImg(grayImage);
     
     if (bContourDraw) {
         contourFinder.draw(0, 0);
