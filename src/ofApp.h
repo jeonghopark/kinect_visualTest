@@ -5,6 +5,8 @@
 #include "ofxKinect.h"
 
 #include "DrawPointCloud.hpp"
+#include "DrawShape.hpp"
+
 
 class ofApp : public ofBaseApp {
 public:
@@ -41,7 +43,6 @@ public:
 	
 	ofEasyCam easyCam;
     
-    
     bool bInformation;
     void information();
     
@@ -52,6 +53,7 @@ public:
     
     void drawTransImg(ofxCvGrayscaleImage _img);
     
-
+    DrawShape drawShape;
+    bool bDrawShape;
     
 };

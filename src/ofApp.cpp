@@ -28,6 +28,8 @@ void ofApp::setup() {
     angle = 0;
     kinect.setCameraTiltAngle(angle);
     
+    drawShape.setup(20);
+    
 }
 
 
@@ -64,10 +66,11 @@ void ofApp::update() {
         
         grayImage.flagImageChanged();
         
-        
         contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
     }
     
+    
+    drawShape.update();
     
 }
 
@@ -77,8 +80,9 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
     
-    ofSetColor(255, 255, 255);
     
+//    kinect.draw(0, 0, 1024, 768);
+    drawTransImg(grayImage);
     
     easyCam.begin();
     drawPointCloud.drawPointCloud(kinect);
@@ -86,9 +90,10 @@ void ofApp::draw() {
     easyCam.end();
     
     
-    kinect.draw(0, 0);
-
-    drawTransImg(grayImage);
+    if (bDrawShape) {
+        drawShape.drawMovingLines(ofColor(255, 0, 0));
+    }
+    
     
     if (bContourDraw) {
         contourFinder.draw(0, 0);
@@ -149,7 +154,8 @@ void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
     }
     
     _transImg.update();
-    _transImg.draw(0, 0);
+    int _kinectSideOffSet = 80;
+    _transImg.draw(0, -_kinectSideOffSet, 1024 + _kinectSideOffSet, 768 + _kinectSideOffSet);
 
     
 }
@@ -182,20 +188,14 @@ void ofApp::information(){
 
 
 
-
-
-
-//--------------------------------------------------------------
-void ofApp::exit() {
-    kinect.setCameraTiltAngle(0);
-    kinect.close();
-}
-
-
-
 //--------------------------------------------------------------
 void ofApp::keyPressed (int key) {
+    
     switch (key) {
+        case 'r':
+            drawShape.setup(20);
+            break;
+
         case ' ':
             bThreshWithOpenCV = !bThreshWithOpenCV;
             break;
@@ -238,35 +238,14 @@ void ofApp::keyPressed (int key) {
         case 'l':
             drawPointCloud.bLinesPointCloud = !drawPointCloud.bLinesPointCloud;
             break;
-            
-        case '1':
-            kinect.setLed(ofxKinect::LED_GREEN);
-            break;
-            
-        case '2':
-            kinect.setLed(ofxKinect::LED_YELLOW);
-            break;
-            
-        case '3':
-            kinect.setLed(ofxKinect::LED_RED);
-            break;
-            
-        case '4':
-            kinect.setLed(ofxKinect::LED_BLINK_GREEN);
-            break;
-            
-        case '5':
-            kinect.setLed(ofxKinect::LED_BLINK_YELLOW_RED);
-            break;
-            
-        case '0':
-            kinect.setLed(ofxKinect::LED_OFF);
+
+        case 's':
+            bDrawShape = !bDrawShape;
             break;
             
         case 'i':
             bInformation = !bInformation;
             break;
-            
             
         case OF_KEY_UP:
             angle++;
@@ -280,6 +259,7 @@ void ofApp::keyPressed (int key) {
             kinect.setCameraTiltAngle(angle);
             break;
     }
+    
 }
 
 //--------------------------------------------------------------
@@ -311,3 +291,13 @@ void ofApp::mouseExited(int x, int y) {
 void ofApp::windowResized(int w, int h) {
     
 }
+
+
+
+//--------------------------------------------------------------
+void ofApp::exit() {
+    kinect.setCameraTiltAngle(0);
+    kinect.close();
+}
+
+

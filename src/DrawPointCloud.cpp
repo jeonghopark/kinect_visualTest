@@ -36,13 +36,15 @@ void DrawPointCloud::drawPointCloud(ofxKinect & kinect) {
         for(int y = 0; y < h; y += step) {
             for(int x = 0; x < w; x += step) {
                 if(kinect.getDistanceAt(x, y) > 0) {
-                    mesh.addColor(kinect.getColorAt(x,y));
+                    mesh.addColor(ofColor(255,0,0));
                     mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
                 }
             }
         }
+
         
-        glPointSize(3);
+        glPointSize(10);
+//        glColor3b(255, 0, 0);
         ofPushMatrix();
         // the projected points are 'upside down' and 'backwards'
         ofScale(1, -1, -1);
@@ -74,7 +76,8 @@ void DrawPointCloud::drawLinesCloud(ofxKinect & kinect) {
         for(int y = 0; y < h; y += step) {
             for(int x = 0; x < w; x += step) {
                 if(kinect.getDistanceAt(x, y) > 0) {
-                    mesh.addColor(kinect.getColorAt(x,y));
+//                    mesh.addColor(kinect.getColorAt(x,y));
+                    mesh.addColor(ofColor(255,0,0));
                     mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
                 }
             }
