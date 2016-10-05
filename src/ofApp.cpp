@@ -30,6 +30,8 @@ void ofApp::setup() {
     
     drawShape.setup(20);
     
+    testManDogImg.load("man_dog.png");
+    
 }
 
 
@@ -95,19 +97,12 @@ void ofApp::draw() {
     }
     
     
-    if (bContourDraw) {
-        contourFinder.draw(0, 0);
-    }
-    
-    
     if (contourFinder.blobs.size()>0 && bContourDraw) {
         ofPushStyle();
-        ofNoFill();
         vector<ofxCvBlob> _b = contourFinder.blobs;
         for (int j=0; j<_b.size(); j++) {
-            vector<ofPoint> _p = _b[j].pts;
-            for (int i=0; i<_p.size(); i++) {
-                ofDrawCircle(_p[i], 10);
+            for (int i=0; i<_b[j].pts.size(); i+=4) {
+                testManDogImg.draw(_b[j].pts[i], 30, 31);
             }
         }
         ofPopStyle();

@@ -56,4 +56,6 @@ public:
     DrawShape drawShape;
     bool bDrawShape;
     
+    ofImage testManDogImg;
+    
 };
