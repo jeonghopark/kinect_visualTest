@@ -83,7 +83,7 @@ void DrawPointCloud::drawLinesCloud(ofxKinect & kinect) {
             }
         }
         
-        glPointSize(3);
+        glPointSize(10);
         ofPushMatrix();
         // the projected points are 'upside down' and 'backwards'
         ofScale(1, -1, -1);
