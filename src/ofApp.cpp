@@ -19,18 +19,32 @@ void ofApp::setup() {
     grayThreshNear.allocate(kinect.width, kinect.height);
     grayThreshFar.allocate(kinect.width, kinect.height);
     
-    nearThreshold = 230;
-    farThreshold = 70;
+    nearThreshold = 91;
+    farThreshold = 22;
     bThreshWithOpenCV = true;
     
     ofSetFrameRate(60);
     
-    angle = 0;
+    angle = 21;
     kinect.setCameraTiltAngle(angle);
     
     drawShape.setup(20);
     
     testManDogImg.load("man_dog.png");
+    
+    kinectSizeOffSet = 80;
+    imageRatio.x = (ofGetWindowSize().x + kinectSizeOffSet) / 640.0;
+    imageRatio.y = (ofGetWindowSize().y + kinectSizeOffSet) / 480.0;
+    
+    
+    gui.setup();
+    gui.add(defaultColor.setup("Default Color", ofColor(255, 255, 255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(backGroundColor.setup("Default Color", ofColor(0, 0), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+
+    
+    bDrawGui = false;
+    
+    bCVDraw = true;
     
 }
 
@@ -38,8 +52,12 @@ void ofApp::setup() {
 
 
 
+
 //--------------------------------------------------------------
 void ofApp::update() {
+    
+    
+    randomShape();
     
     
     kinect.update();
@@ -82,30 +100,41 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
     
+    ofBackground(backGroundColor);
     
 //    kinect.draw(0, 0, 1024, 768);
-    drawTransImg(grayImage);
+    
+    if (bCVDraw) {
+        drawTransImg(grayImage);
+    }
     
     easyCam.begin();
-    drawPointCloud.drawPointCloud(kinect);
-    drawPointCloud.drawLinesCloud(kinect);
+    drawPointCloud.drawPointCloud(kinect, defaultColor);
+    drawPointCloud.drawLinesCloud(kinect, defaultColor);
     easyCam.end();
     
     
     if (bDrawShape) {
-        drawShape.drawMovingLines(ofColor(255, 0, 0));
+        drawShape.drawMovingLines(defaultColor);
     }
     
     
     if (contourFinder.blobs.size()>0 && bContourDraw) {
+        ofPushMatrix();
         ofPushStyle();
+        ofSetRectMode(OF_RECTMODE_CENTER);
+        
+        ofSetColor(defaultColor);
+        
+        ofTranslate(0, -kinectSizeOffSet);
         vector<ofxCvBlob> _b = contourFinder.blobs;
         for (int j=0; j<_b.size(); j++) {
-            for (int i=0; i<_b[j].pts.size(); i+=4) {
-                testManDogImg.draw(_b[j].pts[i], 30, 31);
+            for (int i=0; i<_b[j].pts.size(); i+=20) {
+                testManDogImg.draw(_b[j].pts[i] * imageRatio, 80, 88);
             }
         }
         ofPopStyle();
+        ofPopMatrix();
     }
 
     
@@ -116,6 +145,9 @@ void ofApp::draw() {
     
     ofDrawBitmapString(ofToString(ofGetFrameRate(),2), 10, 10);
     
+    if (bDrawGui) {
+        gui.draw();
+    }
     
 }
 
@@ -136,10 +168,11 @@ void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
     int numPixels = pix.size();
     for(int i = 0; i < numPixels; i++) {
         if(pix[i] == 255) {
-            pixT[i*4+0] = 255;
-            pixT[i*4+1] = 0;
-            pixT[i*4+2] = 0;
-            pixT[i*4+3] = 255;
+            ofColor _c = defaultColor;
+            pixT[i*4+0] = _c.r;
+            pixT[i*4+1] = _c.g;
+            pixT[i*4+2] = _c.b;
+            pixT[i*4+3] = _c.a;
         } else {
             pixT[i*4+0] = pix[i];
             pixT[i*4+1] = 255;
@@ -149,11 +182,23 @@ void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
     }
     
     _transImg.update();
-    int _kinectSideOffSet = 80;
-    _transImg.draw(0, -_kinectSideOffSet, 1024 + _kinectSideOffSet, 768 + _kinectSideOffSet);
+    _transImg.draw(0, -kinectSizeOffSet, ofGetWindowSize().x + kinectSizeOffSet, ofGetWindowSize().y + kinectSizeOffSet);
 
     
 }
+
+
+
+
+//--------------------------------------------------------------
+void ofApp::randomShape(){
+
+    if (ofGetFrameNum() % 60 == 0) {
+        drawShape.setup(20);
+    }
+   
+}
+
 
 
 
@@ -240,7 +285,13 @@ void ofApp::keyPressed (int key) {
             
         case 'i':
             bInformation = !bInformation;
+            bDrawGui = !bDrawGui;
             break;
+
+        case 'v':
+            bCVDraw = !bCVDraw;
+            break;
+            
             
         case OF_KEY_UP:
             angle++;
@@ -284,7 +335,10 @@ void ofApp::mouseExited(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h) {
-    
+
+    imageRatio.x = (ofGetWindowSize().x + kinectSizeOffSet) / 640.0;
+    imageRatio.y = (ofGetWindowSize().y + kinectSizeOffSet) / 480.0;
+   
 }
 
 

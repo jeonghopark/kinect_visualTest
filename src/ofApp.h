@@ -3,9 +3,11 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
+#include "ofxGui.h"
 
 #include "DrawPointCloud.hpp"
 #include "DrawShape.hpp"
+
 
 
 class ofApp : public ofBaseApp {
@@ -55,7 +57,20 @@ public:
     
     DrawShape drawShape;
     bool bDrawShape;
+    bool bCVDraw;
     
     ofImage testManDogImg;
     
+    ofVec2f imageRatio;
+    int kinectSizeOffSet;
+    
+//    ofColor defaultColor;
+    
+    ofxPanel gui;
+    ofxColorSlider defaultColor;
+    ofxColorSlider backGroundColor;
+    
+    bool bDrawGui;
+    
+    void randomShape();
 };

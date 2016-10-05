@@ -22,7 +22,7 @@ DrawPointCloud::DrawPointCloud(){
 
 
 //--------------------------------------------------------------
-void DrawPointCloud::drawPointCloud(ofxKinect & kinect) {
+void DrawPointCloud::drawPointCloud(ofxKinect & kinect, ofColor _c) {
     
     int w = 640;
     int h = 480;
@@ -36,7 +36,7 @@ void DrawPointCloud::drawPointCloud(ofxKinect & kinect) {
         for(int y = 0; y < h; y += step) {
             for(int x = 0; x < w; x += step) {
                 if(kinect.getDistanceAt(x, y) > 0) {
-                    mesh.addColor(ofColor(255,0,0));
+                    mesh.addColor(_c);
                     mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
                 }
             }
@@ -62,7 +62,7 @@ void DrawPointCloud::drawPointCloud(ofxKinect & kinect) {
 
 
 //--------------------------------------------------------------
-void DrawPointCloud::drawLinesCloud(ofxKinect & kinect) {
+void DrawPointCloud::drawLinesCloud(ofxKinect & kinect, ofColor _c) {
     
     int w = 640;
     int h = 480;
@@ -77,7 +77,7 @@ void DrawPointCloud::drawLinesCloud(ofxKinect & kinect) {
             for(int x = 0; x < w; x += step) {
                 if(kinect.getDistanceAt(x, y) > 0) {
 //                    mesh.addColor(kinect.getColorAt(x,y));
-                    mesh.addColor(ofColor(255,0,0));
+                    mesh.addColor(_c);
                     mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
                 }
             }

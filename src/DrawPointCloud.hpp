@@ -27,8 +27,8 @@ public:
     bool bLinesPointCloud;
     
     
-    void drawPointCloud(ofxKinect & _kinect);
-    void drawLinesCloud(ofxKinect & _kinect);
+    void drawPointCloud(ofxKinect & _kinect, ofColor _c);
+    void drawLinesCloud(ofxKinect & _kinect, ofColor _c);
     
     
 };
