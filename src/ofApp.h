@@ -4,9 +4,15 @@
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
 #include "ofxGui.h"
+#include "ofxCv.h"
+#include "ctmf.h"
+
 
 #include "DrawPointCloud.hpp"
 #include "DrawShape.hpp"
+
+
+using namespace milton;
 
 
 
@@ -59,7 +65,7 @@ public:
     bool bDrawShape;
     bool bCVDraw;
     
-    ofImage testManDogImg;
+    vector<ofImage> silhoutteImg;
     
     ofVec2f imageRatio;
     int kinectSizeOffSet;
@@ -73,4 +79,16 @@ public:
     bool bDrawGui;
     
     void randomShape();
+    
+    unsigned char * thresholdedImage;
+    
+    unsigned char * graypixels;
+    unsigned char * medianFiltered;
+    
+    ofImage medianFilteredResult;
+    ofxCv::ContourFinder finder;
+
 };
+
+
+

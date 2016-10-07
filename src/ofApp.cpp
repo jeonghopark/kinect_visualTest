@@ -13,7 +13,7 @@ void ofApp::setup() {
     
     kinect.init();
     kinect.open();
-
+    
     colorImg.allocate(kinect.width, kinect.height);
     grayImage.allocate(kinect.width, kinect.height);
     grayThreshNear.allocate(kinect.width, kinect.height);
@@ -25,12 +25,10 @@ void ofApp::setup() {
     
     ofSetFrameRate(60);
     
-    angle = 21;
+    angle = 0;
     kinect.setCameraTiltAngle(angle);
     
     drawShape.setup(20);
-    
-    testManDogImg.load("man_dog.png");
     
     kinectSizeOffSet = 80;
     imageRatio.x = (ofGetWindowSize().x + kinectSizeOffSet) / 640.0;
@@ -43,9 +41,24 @@ void ofApp::setup() {
 
     
     bDrawGui = false;
-    
     bCVDraw = true;
+    bContourDraw = true;
     
+    
+    ofDirectory _dir;
+    _dir.listDir("silhoutteImg/");
+    _dir.allowExt("jpg");
+    _dir.sort();
+    silhoutteImg.resize(_dir.size());
+    for(int i = 0; i<silhoutteImg.size(); i++){
+        silhoutteImg[i].load(_dir.getPath(i));
+    }
+
+    
+    graypixels = new unsigned char[640*480];
+    medianFiltered = new unsigned char[640*480];
+    medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
+
 }
 
 
@@ -57,40 +70,70 @@ void ofApp::setup() {
 void ofApp::update() {
     
     
-    randomShape();
+//    randomShape();
     
     
     kinect.update();
     
     if(kinect.isFrameNew()) {
         
-        grayImage.setFromPixels(kinect.getDepthPixels());
+//        grayImage.setFromPixels(kinect.getDepthPixels());
+//        
+//        if(bThreshWithOpenCV) {
+//            grayThreshNear = grayImage;
+//            grayThreshFar = grayImage;
+//            grayThreshNear.threshold(nearThreshold, true);
+//            grayThreshFar.threshold(farThreshold);
+//            cvAnd(grayThreshNear.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
+//        } else {
+//            ofPixels & pix = grayImage.getPixels();
+//            int numPixels = pix.size();
+//            for(int i = 0; i < numPixels; i++) {
+//                if(pix[i] < nearThreshold && pix[i] > farThreshold) {
+//                    pix[i] = 255;
+//                } else {
+//                    pix[i] = 0;
+//                }
+//            }
+//        }
         
-        if(bThreshWithOpenCV) {
-            grayThreshNear = grayImage;
-            grayThreshFar = grayImage;
-            grayThreshNear.threshold(nearThreshold, true);
-            grayThreshFar.threshold(farThreshold);
-            cvAnd(grayThreshNear.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
-        } else {
-            ofPixels & pix = grayImage.getPixels();
-            int numPixels = pix.size();
-            for(int i = 0; i < numPixels; i++) {
-                if(pix[i] < nearThreshold && pix[i] > farThreshold) {
-                    pix[i] = 255;
-                } else {
-                    pix[i] = 0;
-                }
-            }
+        unsigned char * data  = kinect.getDepthPixels().getData();
+        for (int i = 0; i < 640*480; i++){
+            graypixels[i] = data[i];
         }
         
-        grayImage.flagImageChanged();
+        
+        ctmf(graypixels, medianFiltered,
+             640, 480, 640, 640, 30, 1);
+        
+        medianFilteredResult.setFromPixels(medianFiltered, 640, 480, OF_IMAGE_GRAYSCALE);
+        
+//        finder.setSortBySize(true);
+//        finder.setThreshold(100);
+        
+//        finder.findContours(medianFilteredResult);
+        
+//        grayImage.flagImageChanged();
+        
+        
+        grayImage.setFromPixels(medianFiltered, 640, 480);
+        
+        ofPixels & pix = grayImage.getPixels();
+        int numPixels = pix.size();
+        for(int i = 0; i < numPixels; i++) {
+            if(pix[i] < nearThreshold && pix[i] > farThreshold) {
+                pix[i] = 255;
+            } else {
+                pix[i] = 0;
+            }
+        }
+
         
         contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
     }
     
     
-    drawShape.update();
+//    drawShape.update();
     
 }
 
@@ -107,17 +150,27 @@ void ofApp::draw() {
     if (bCVDraw) {
         drawTransImg(grayImage);
     }
+//
+//    easyCam.begin();
+//    drawPointCloud.drawPointCloud(kinect, defaultColor);
+//    drawPointCloud.drawLinesCloud(kinect, defaultColor);
+//    easyCam.end();
+//    
+//    
+//    if (bDrawShape) {
+//        drawShape.drawMovingLines(defaultColor);
+//    }
     
-    easyCam.begin();
-    drawPointCloud.drawPointCloud(kinect, defaultColor);
-    drawPointCloud.drawLinesCloud(kinect, defaultColor);
-    easyCam.end();
+//    medianFilteredResult.draw(0,0);
+
     
-    
-    if (bDrawShape) {
-        drawShape.drawMovingLines(defaultColor);
-    }
-    
+//    if (finder.size() > 0){
+//        ofPushMatrix();
+//        ofTranslate(0,0);
+//        finder.getPolyline(0).draw();
+//        ofPopMatrix();
+//    }
+
     
     if (contourFinder.blobs.size()>0 && bContourDraw) {
         ofPushMatrix();
@@ -128,9 +181,15 @@ void ofApp::draw() {
         
         ofTranslate(0, -kinectSizeOffSet);
         vector<ofxCvBlob> _b = contourFinder.blobs;
+        int _index;
+        cout << _b.size() << endl;
         for (int j=0; j<_b.size(); j++) {
-            for (int i=0; i<_b[j].pts.size(); i+=20) {
-                testManDogImg.draw(_b[j].pts[i] * imageRatio, 80, 88);
+            for (int i=0; i<_b[j].pts.size(); i+=17) {
+                float _ratioSize = 0.25;
+                _index++;
+                _index = _index % silhoutteImg.size();
+                
+                silhoutteImg[_index].draw(_b[j].pts[i] * imageRatio, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
             }
         }
         ofPopStyle();
