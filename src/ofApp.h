@@ -11,7 +11,6 @@
 #include "DrawPointCloud.hpp"
 #include "DrawShape.hpp"
 
-
 using namespace milton;
 
 
@@ -23,7 +22,7 @@ public:
 	void update();
 	void draw();
 	void exit();
-	
+	    
 	void keyPressed(int key);
 	void mouseDragged(int x, int y, int button);
 	void mousePressed(int x, int y, int button);
@@ -34,14 +33,6 @@ public:
 	
 	ofxKinect kinect;
 		
-//	ofxCvColorImage colorImg;
-//	
-//	ofxCvGrayscaleImage grayImage;
-//	ofxCvGrayscaleImage grayThreshNear;
-//	ofxCvGrayscaleImage grayThreshFar;
-//	
-//	ofxCvContourFinder contourFinder;
-	
 	bool bThreshWithOpenCV;
 	
 	int nearThreshold;
@@ -69,8 +60,6 @@ public:
     
     ofVec2f imageRatio;
     int kinectSizeOffSet;
-    
-//    ofColor defaultColor;
     
     ofxPanel gui;
     ofxColorSlider defaultColor;

@@ -17,11 +17,6 @@ void ofApp::setup() {
     kinect.init();
     kinect.open();
     
-    //    colorImg.allocate(kinect.width, kinect.height);
-    //    grayImage.allocate(kinect.width, kinect.height);
-    //    grayThreshNear.allocate(kinect.width, kinect.height);
-    //    grayThreshFar.allocate(kinect.width, kinect.height);
-    
     nearThreshold = 91;
     farThreshold = 22;
     bThreshWithOpenCV = true;
@@ -82,32 +77,10 @@ void ofApp::update() {
     
     if(kinect.isFrameNew()) {
         
-        //        grayImage.setFromPixels(kinect.getDepthPixels());
-        //
-        //        if(bThreshWithOpenCV) {
-        //            grayThreshNear = grayImage;
-        //            grayThreshFar = grayImage;
-        //            grayThreshNear.threshold(nearThreshold, true);
-        //            grayThreshFar.threshold(farThreshold);
-        //            cvAnd(grayThreshNear.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
-        //        } else {
-        //            ofPixels & pix = grayImage.getPixels();
-        //            int numPixels = pix.size();
-        //            for(int i = 0; i < numPixels; i++) {
-        //                if(pix[i] < nearThreshold && pix[i] > farThreshold) {
-        //                    pix[i] = 255;
-        //                } else {
-        //                    pix[i] = 0;
-        //                }
-        //            }
-        //        }
-        
         unsigned char * data  = kinect.getDepthPixels().getData();
         for (int i = 0; i < 640*480; i++){
             graypixels[i] = data[i];
         }
-        
-        
         ctmf(graypixels, medianFiltered,
              640, 480, 640, 640, ctmffilterValue, 1);
         
@@ -423,5 +396,8 @@ void ofApp::exit() {
     kinect.setCameraTiltAngle(0);
     kinect.close();
 }
+
+
+
 
 
