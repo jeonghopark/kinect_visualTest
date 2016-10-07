@@ -39,9 +39,9 @@ void ofApp::setup() {
     
     
     gui.setup();
-    gui.add(ctmffilterValue.setup("Filter", 5, 1, 30));
-    gui.add(defaultColor.setup("Default Color", ofColor(255, 255, 255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(backGroundColor.setup("Default Color", ofColor(0, 0), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(ctmffilterValue.setup("Filter", 15, 1, 30));
+    gui.add(defaultColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(backGroundColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     
     
     
@@ -158,7 +158,7 @@ void ofApp::draw() {
     //    kinect.draw(0, 0, 1024, 768);
     
     if (bCVDraw) {
-        //        drawTransImg(grayImage);
+//        drawTransImg(medianFilteredResult);
     }
     //
     //    easyCam.begin();
@@ -171,7 +171,7 @@ void ofApp::draw() {
     //        drawShape.drawMovingLines(defaultColor);
     //    }
     
-    //    medianFilteredResult.draw(0,0);
+//        medianFilteredResult.draw(0,0);
     
     
     if (finder.size() > 0){
@@ -194,7 +194,10 @@ void ofApp::draw() {
         ofTranslate(0, -kinectSizeOffSet);
         
         for (int j=0; j<finder.size(); j++) {
+            ofPushMatrix();
+            ofScale(imageRatio.x, imageRatio.y, 0);
             finder.getPolyline(j).draw();
+            ofPopMatrix();
             
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();
@@ -229,35 +232,35 @@ void ofApp::draw() {
 
 
 //--------------------------------------------------------------
-//void ofApp::drawTransImg(ofxCvGrayscaleImage _img){
-//
-//    ofImage _transImg;
-//
-//    _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
-//
-//    ofPixels & pix = _img.getPixels();
-//    ofPixels & pixT = _transImg.getPixels();
-//    int numPixels = pix.size();
-//    for(int i = 0; i < numPixels; i++) {
-//        if(pix[i] == 255) {
-//            ofColor _c = defaultColor;
-//            pixT[i*4+0] = _c.r;
-//            pixT[i*4+1] = _c.g;
-//            pixT[i*4+2] = _c.b;
-//            pixT[i*4+3] = _c.a;
-//        } else {
-//            pixT[i*4+0] = pix[i];
-//            pixT[i*4+1] = 255;
-//            pixT[i*4+2] = 255;
-//            pixT[i*4+3] = 0;
-//        }
-//    }
-//
-//    _transImg.update();
-//    _transImg.draw(0, -kinectSizeOffSet, ofGetWindowSize().x + kinectSizeOffSet, ofGetWindowSize().y + kinectSizeOffSet);
-//
-//
-//}
+void ofApp::drawTransImg(ofImage _img){
+
+    ofImage _transImg;
+
+    _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+
+    ofPixels & pix = _img.getPixels();
+    ofPixels & pixT = _transImg.getPixels();
+    int numPixels = pix.size();
+    for(int i = 0; i < numPixels; i++) {
+        if(pix[i] > 200) {
+            ofColor _c = defaultColor;
+            pixT[i*4+0] = _c.r;
+            pixT[i*4+1] = _c.g;
+            pixT[i*4+2] = _c.b;
+            pixT[i*4+3] = _c.a;
+        } else {
+            pixT[i*4+0] = pix[i];
+            pixT[i*4+1] = 255;
+            pixT[i*4+2] = 255;
+            pixT[i*4+3] = 0;
+        }
+    }
+
+    _transImg.update();
+    _transImg.draw(0, -kinectSizeOffSet, ofGetWindowSize().x + kinectSizeOffSet, ofGetWindowSize().y + kinectSizeOffSet);
+
+
+}
 
 
 

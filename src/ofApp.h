@@ -59,7 +59,7 @@ public:
     
     bool bContourDraw;
     
-//    void drawTransImg(ofxCvGrayscaleImage _img);
+    void drawTransImg(ofImage _img);
     
     DrawShape drawShape;
     bool bDrawShape;
