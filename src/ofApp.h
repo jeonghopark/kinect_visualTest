@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxOpenCv.h"
+//#include "ofxOpenCv.h"
 #include "ofxKinect.h"
 #include "ofxGui.h"
 #include "ofxCv.h"
@@ -34,13 +34,13 @@ public:
 	
 	ofxKinect kinect;
 		
-	ofxCvColorImage colorImg;
-	
-	ofxCvGrayscaleImage grayImage;
-	ofxCvGrayscaleImage grayThreshNear;
-	ofxCvGrayscaleImage grayThreshFar;
-	
-	ofxCvContourFinder contourFinder;
+//	ofxCvColorImage colorImg;
+//	
+//	ofxCvGrayscaleImage grayImage;
+//	ofxCvGrayscaleImage grayThreshNear;
+//	ofxCvGrayscaleImage grayThreshFar;
+//	
+//	ofxCvContourFinder contourFinder;
 	
 	bool bThreshWithOpenCV;
 	
@@ -59,7 +59,7 @@ public:
     
     bool bContourDraw;
     
-    void drawTransImg(ofxCvGrayscaleImage _img);
+//    void drawTransImg(ofxCvGrayscaleImage _img);
     
     DrawShape drawShape;
     bool bDrawShape;
@@ -75,6 +75,7 @@ public:
     ofxPanel gui;
     ofxColorSlider defaultColor;
     ofxColorSlider backGroundColor;
+    ofxIntSlider ctmffilterValue;
     
     bool bDrawGui;
     
