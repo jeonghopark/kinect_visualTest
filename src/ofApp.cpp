@@ -69,20 +69,21 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
     
-    
-    //    randomShape();
-    
-    
     kinect.update();
     
     if(kinect.isFrameNew()) {
         
         unsigned char * data  = kinect.getDepthPixels().getData();
+        unsigned char * pix = kinect.getDepthPixels().getData();
         for (int i = 0; i < 640*480; i++){
-            graypixels[i] = data[i];
+            if(pix[i] < nearThreshold && pix[i] > farThreshold) {
+                pix[i] = 255;
+            } else {
+                pix[i] = 0;
+            }
         }
-        ctmf(graypixels, medianFiltered,
-             640, 480, 640, 640, ctmffilterValue, 1);
+
+        ctmf(pix, medianFiltered, 640, 480, 640, 640, ctmffilterValue, 1);
         
         medianFilteredResult.setFromPixels(medianFiltered, 640, 480, OF_IMAGE_GRAYSCALE);
         
@@ -255,13 +256,12 @@ void ofApp::randomShape(){
 //--------------------------------------------------------------
 void ofApp::information(){
     
-    ofSetColor(255, 255, 255);
+    ofSetColor(0);
     stringstream reportStream;
     
     reportStream << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
     << "set near threshold " << nearThreshold << " (press: + -)" << endl
-    //    << "set far threshold " << farThreshold << " (press: < >) num blobs found " << contourFinder.nBlobs
-    << ", fps: " << ofGetFrameRate() << endl;
+    << "set far threshold " << farThreshold << ", fps: " << ofGetFrameRate() << endl;
     
     if(kinect.hasCamTiltControl()) {
         reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
