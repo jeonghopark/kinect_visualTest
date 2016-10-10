@@ -5,8 +5,9 @@
 #include "ofxKinect.h"
 #include "ofxGui.h"
 #include "ofxCv.h"
-#include "ctmf.h"
+#include "ofxAVFVideoRecorder.h"
 
+#include "ctmf.h"
 
 #include "DrawPointCloud.hpp"
 #include "DrawShape.hpp"
@@ -78,6 +79,10 @@ public:
     ofImage medianFilteredResult;
     ofxCv::ContourFinder finder;
 
+
+    ofxAVFVideoRecorder recorder;
+    bool recordVideo;
+    
 };
 
 

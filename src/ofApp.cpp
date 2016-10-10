@@ -59,6 +59,14 @@ void ofApp::setup() {
     medianFiltered = new unsigned char[640*480];
     medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     
+    
+    int width = 640;
+    int height = 480;
+    int framerate = 30;
+    int num_frames = 120;
+
+    recorder.setup(ofToDataPath("test.mov"), width, height, framerate); // must end in .mov extension
+
 }
 
 
@@ -114,6 +122,10 @@ void ofApp::update() {
         //
         //
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
+        
+        if(recordVideo) {
+            recorder.writeRGBA(medianFiltered);
+        }
     }
     
     
@@ -129,23 +141,20 @@ void ofApp::draw() {
     
     ofBackground(backGroundColor);
     
-    //    kinect.draw(0, 0, 1024, 768);
-    
     if (bCVDraw) {
 //        drawTransImg(medianFilteredResult);
     }
-    //
-    //    easyCam.begin();
-    //    drawPointCloud.drawPointCloud(kinect, defaultColor);
-    //    drawPointCloud.drawLinesCloud(kinect, defaultColor);
-    //    easyCam.end();
-    //
-    //
+    
+    easyCam.begin();
+    drawPointCloud.drawPointCloud(kinect, defaultColor);
+    drawPointCloud.drawLinesCloud(kinect, defaultColor);
+    easyCam.end();
+
     //    if (bDrawShape) {
     //        drawShape.drawMovingLines(defaultColor);
     //    }
     
-//        medianFilteredResult.draw(0,0);
+//    medianFilteredResult.draw(0,0);
     
     
     if (finder.size() > 0){
@@ -176,12 +185,14 @@ void ofApp::draw() {
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();
             
-            for (int i=0; i<_v.size(); i+=17) {
-                float _ratioSize = 0.25;
+            for (int i=0; i<_v.size(); i++) {
+                float _ratioSize = 0.18;
                 int _index = i % silhoutteImg.size();
-                silhoutteImg[_index].draw(_v[i] * imageRatio, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                silhoutteImg[_index].draw(_polyLines.getPointAtPercent(i/100.0) * imageRatio, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
             }
+            
         }
+        
         ofPopStyle();
         ofPopMatrix();
     }
@@ -192,6 +203,7 @@ void ofApp::draw() {
     }
     
     
+    
     ofDrawBitmapString(ofToString(ofGetFrameRate(),2), 10, 10);
     
     if (bDrawGui) {
@@ -199,7 +211,6 @@ void ofApp::draw() {
     }
     
 }
-
 
 
 
@@ -235,6 +246,8 @@ void ofApp::drawTransImg(ofImage _img){
 
 
 }
+
+
 
 
 
@@ -281,7 +294,9 @@ void ofApp::keyPressed (int key) {
     
     switch (key) {
         case 'r':
-            drawShape.setup(20);
+            recordVideo = !recordVideo;
+//            drawShape.setup(20);
+            if (!recordVideo) recorder.finishMovie();
             break;
             
         case ' ':
