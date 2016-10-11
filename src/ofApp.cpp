@@ -64,7 +64,8 @@ void ofApp::setup() {
     int width = 640;
     int height = 480;
     int framerate = 30;
-    recorder.setup(ofToDataPath("test.mov"), 160, 120, framerate);
+    string _timeS = ofGetTimestampString();
+    recorder.setup(ofToDataPath( _timeS + ".mov"), 160, 120, framerate);
     recordBuff = new unsigned char[160*120*4];
 
 }
@@ -94,10 +95,10 @@ void ofApp::update() {
         ctmf(pix, medianFiltered, 640, 480, 640, 640, ctmffilterValue, 1);
         
         medianFilteredResult.setFromPixels(medianFiltered, 640, 480, OF_IMAGE_GRAYSCALE);
+        medianFilteredResult.mirror(false, true);
         
         finder.setSortBySize(true);
         finder.setThreshold(100);
-        
         finder.setMinAreaRadius(10);
         finder.setMaxAreaRadius(200);
         finder.setThreshold(127);
@@ -214,6 +215,7 @@ void ofApp::draw() {
             for (int i=0; i<_v.size()-1; i++) {
                 ofPoint _v1 = _polyLines.getPointAtPercent(i/100.0) * imageRatio;
                 ofPoint _v2 = _polyLines.getPointAtPercent((i+1)/100.0) * imageRatio;
+                
                 ofPushMatrix();
                 ofTranslate(_v1.x, _v1.y, 0);
                 ofRotateZDeg(90);
@@ -229,7 +231,7 @@ void ofApp::draw() {
                 float _ratioSize = 0.18;
                 int _index = i % silhoutteImg.size();
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
-                silhoutteImg[_index].draw(0,0,0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
                 ofPopMatrix();
             }
             
@@ -344,13 +346,15 @@ void ofApp::information(){
 void ofApp::keyPressed (int key) {
     
     switch (key) {
+
         case 'r':
-            // FIXME:: error re-record
             recordVideo = !recordVideo;
-//            drawShape.setup(20);
-            if (!recordVideo) recorder.finishMovie();
             break;
-            
+
+        case 'f':
+            recorder.finishMovie();
+            break;
+
         case ' ':
             bThreshWithOpenCV = !bThreshWithOpenCV;
             break;
@@ -395,9 +399,9 @@ void ofApp::keyPressed (int key) {
             break;
             
         case 's':
-            bDrawShape = !bDrawShape;
+            recorder.setup(ofToDataPath(ofGetTimestampString() + ".mov"), 160, 120, 30);
             break;
-            
+
         case 'i':
             bInformation = !bInformation;
             bDrawGui = !bDrawGui;
