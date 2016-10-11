@@ -16,8 +16,9 @@ void ofApp::setup() {
     
     kinect.init();
     kinect.open();
+    kinect.enableDepthNearValueWhite(false);
     
-    nearThreshold = 91;
+    nearThreshold = 62;
     farThreshold = 22;
     bThreshWithOpenCV = true;
     
@@ -35,8 +36,8 @@ void ofApp::setup() {
     
     gui.setup();
     gui.add(ctmffilterValue.setup("Filter", 15, 1, 30));
-    gui.add(defaultColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(backGroundColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(defaultColor.setup("Background Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(backGroundColor.setup("Shape Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     
     
     
@@ -160,7 +161,7 @@ void ofApp::draw() {
     ofBackground(backGroundColor);
     
     if (bCVDraw) {
-//        drawTransImg(medianFilteredResult);
+        drawTransImg(medianFilteredResult);
     }
     
     easyCam.begin();
@@ -172,7 +173,7 @@ void ofApp::draw() {
     //        drawShape.drawMovingLines(defaultColor);
     //    }
     
-//    medianFilteredResult.draw(0,0);
+//    medianFilteredResult.draw(0, 0);
     
     
     if (finder.size() > 0){
@@ -224,8 +225,7 @@ void ofApp::draw() {
                 ofPoint _diffV = _v2 -_v1;
                 float _degree = atan2(_diffV.y, _diffV.x);
                 ofTranslate(_v1.x, _v1.y, 0);
-                ofRotateZDeg((_degree * RAD_TO_DEG) + 180);
-//                ofTranslate(-_v1.x, -_v1.y, 0);
+                ofRotateZDeg(ofRadToDeg(_degree) + 180);
                 float _ratioSize = 0.18;
                 int _index = i % silhoutteImg.size();
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
@@ -253,9 +253,9 @@ void ofApp::draw() {
     }
     
     
-    ofImage _test;
-    _test.setFromPixels(recordBuff, 160, 120, OF_IMAGE_COLOR_ALPHA);
-    _test.draw(100, 100);
+//    ofImage _test;
+//    _test.setFromPixels(recordBuff, 160, 120, OF_IMAGE_COLOR_ALPHA);
+//    _test.draw(100, 100);
     
 }
 
@@ -318,7 +318,7 @@ void ofApp::information(){
     
     ofPushStyle();
     
-    ofSetColor(0);
+    ofSetColor(255);
     stringstream reportStream;
     
     reportStream << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
