@@ -64,7 +64,7 @@ void ofApp::setup() {
     int height = 480;
     int framerate = 30;
     recorder.setup(ofToDataPath("test.mov"), 160, 120, framerate);
-    _buff = new unsigned char[160*120*4];
+    recordBuff = new unsigned char[160*120*4];
 
 }
 
@@ -129,17 +129,17 @@ void ofApp::update() {
                 for (int i=0; i<160; i++){
                     int _index = (j * 4 * 160 + i) * 4;
                     int _ind = (j * 160 + i) * 4;
-                    _buff[_ind] = medianFiltered[_index];
-                    _buff[_ind+1] = medianFiltered[_index];
-                    _buff[_ind+2] = medianFiltered[_index];
-                    if (!medianFiltered[_index]==0) {
-                        _buff[_ind+3] = 255;
+                    recordBuff[_ind] = medianFiltered[_index];
+                    recordBuff[_ind+1] = medianFiltered[_index];
+                    recordBuff[_ind+2] = medianFiltered[_index];
+                    if (medianFiltered[_index]!=0) {
+                        recordBuff[_ind+3] = 255;
                     } else {
-                        _buff[_ind+3] = 0;
+                        recordBuff[_ind+3] = 0;
                     }
                 }
             }
-            recorder.writeRGBA(_buff);
+            recorder.writeRGBA(recordBuff);
         }
         
         
@@ -206,7 +206,31 @@ void ofApp::draw() {
             for (int i=0; i<_v.size(); i++) {
                 float _ratioSize = 0.18;
                 int _index = i % silhoutteImg.size();
-                silhoutteImg[_index].draw(_polyLines.getPointAtPercent(i/100.0) * imageRatio, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+//                silhoutteImg[_index].draw(_polyLines.getPointAtPercent(i/100.0) * imageRatio, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+            }
+
+            
+            for (int i=0; i<_v.size()-1; i++) {
+                ofPoint _v1 = _polyLines.getPointAtPercent(i/100.0) * imageRatio;
+                ofPoint _v2 = _polyLines.getPointAtPercent((i+1)/100.0) * imageRatio;
+                ofPushMatrix();
+                ofTranslate(_v1.x, _v1.y, 0);
+                ofRotateZDeg(90);
+                ofTranslate(-_v1.x, -_v1.y, 0);
+                ofDrawLine(_v1, _v2);
+                ofPopMatrix();
+
+                ofPushMatrix();
+                ofPoint _diffV = _v2 -_v1;
+                float _degree = atan2(_diffV.y, _diffV.x);
+                ofTranslate(_v1.x, _v1.y, 0);
+                ofRotateZDeg((_degree * RAD_TO_DEG) + 180);
+//                ofTranslate(-_v1.x, -_v1.y, 0);
+                float _ratioSize = 0.18;
+                int _index = i % silhoutteImg.size();
+                ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
+                silhoutteImg[_index].draw(0,0,0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                ofPopMatrix();
             }
             
         }
@@ -230,7 +254,7 @@ void ofApp::draw() {
     
     
     ofImage _test;
-    _test.setFromPixels(_buff, 160, 120, OF_IMAGE_COLOR_ALPHA);
+    _test.setFromPixels(recordBuff, 160, 120, OF_IMAGE_COLOR_ALPHA);
     _test.draw(100, 100);
     
 }
@@ -321,6 +345,7 @@ void ofApp::keyPressed (int key) {
     
     switch (key) {
         case 'r':
+            // FIXME:: error re-record
             recordVideo = !recordVideo;
 //            drawShape.setup(20);
             if (!recordVideo) recorder.finishMovie();

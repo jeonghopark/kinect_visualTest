@@ -82,7 +82,8 @@ public:
 
     ofxAVFVideoRecorder recorder;
     bool recordVideo;
-    unsigned char * _buff;
+    unsigned char * recordBuff;
+
 };
 
 
