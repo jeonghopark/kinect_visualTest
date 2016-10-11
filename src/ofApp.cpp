@@ -63,10 +63,7 @@ void ofApp::setup() {
     int width = 640;
     int height = 480;
     int framerate = 30;
-    int num_frames = 120;
-
-    recorder.setup(ofToDataPath("test.mov"), 160, 120, framerate); // must end in .mov extension
-
+    recorder.setup(ofToDataPath("test.mov"), 160, 120, framerate);
     _buff = new unsigned char[160*120*4];
 
 }
@@ -124,29 +121,28 @@ void ofApp::update() {
         //
         //
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
+
         
         if(recordVideo) {
-            for (int i = 0; i<160*120*4; i++){
-                _buff[i*4] = medianFiltered[i*4];
-                _buff[i*4+1] = medianFiltered[i*4];
-                _buff[i*4+2] = medianFiltered[i*4];
-                _buff[i*4+3] = medianFiltered[i*4];
+            // ???: check char position
+            for (int j=0; j<120; j++){
+                for (int i=0; i<160; i++){
+                    int _index = (j * 4 * 160 + i) * 4;
+                    int _ind = (j * 160 + i) * 4;
+                    _buff[_ind] = medianFiltered[_index];
+                    _buff[_ind+1] = medianFiltered[_index];
+                    _buff[_ind+2] = medianFiltered[_index];
+                    if (!medianFiltered[_index]==0) {
+                        _buff[_ind+3] = 255;
+                    } else {
+                        _buff[_ind+3] = 0;
+                    }
+                }
             }
             recorder.writeRGBA(_buff);
         }
         
         
-        // TODO::why 16???
-        for (int j=0; j<120; j++){
-            for (int i=0; i<160; i++){
-                int _index = j * 16 * 160 + i * 4;
-                int _ind = j * 160 + i;
-                _buff[_ind*4] = medianFiltered[_index];
-                _buff[_ind*4+1] = medianFiltered[_index];
-                _buff[_ind*4+2] = medianFiltered[_index];
-                _buff[_ind*4+3] = 255;
-            }
-        }
         
     }
     
