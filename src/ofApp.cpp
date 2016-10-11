@@ -65,7 +65,9 @@ void ofApp::setup() {
     int framerate = 30;
     int num_frames = 120;
 
-    recorder.setup(ofToDataPath("test.mov"), width, height, framerate); // must end in .mov extension
+    recorder.setup(ofToDataPath("test.mov"), 160, 120, framerate); // must end in .mov extension
+
+    _buff = new unsigned char[160*120*4];
 
 }
 
@@ -124,8 +126,28 @@ void ofApp::update() {
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
         
         if(recordVideo) {
-            recorder.writeRGBA(medianFiltered);
+            for (int i = 0; i<160*120*4; i++){
+                _buff[i*4] = medianFiltered[i*4];
+                _buff[i*4+1] = medianFiltered[i*4];
+                _buff[i*4+2] = medianFiltered[i*4];
+                _buff[i*4+3] = medianFiltered[i*4];
+            }
+            recorder.writeRGBA(_buff);
         }
+        
+        
+        // TODO::why 16???
+        for (int j=0; j<120; j++){
+            for (int i=0; i<160; i++){
+                int _index = j * 16 * 160 + i * 4;
+                int _ind = j * 160 + i;
+                _buff[_ind*4] = medianFiltered[_index];
+                _buff[_ind*4+1] = medianFiltered[_index];
+                _buff[_ind*4+2] = medianFiltered[_index];
+                _buff[_ind*4+3] = 255;
+            }
+        }
+        
     }
     
     
@@ -210,6 +232,11 @@ void ofApp::draw() {
         gui.draw();
     }
     
+    
+    ofImage _test;
+    _test.setFromPixels(_buff, 160, 120, OF_IMAGE_COLOR_ALPHA);
+    _test.draw(100, 100);
+    
 }
 
 
@@ -269,6 +296,8 @@ void ofApp::randomShape(){
 //--------------------------------------------------------------
 void ofApp::information(){
     
+    ofPushStyle();
+    
     ofSetColor(0);
     stringstream reportStream;
     
@@ -282,6 +311,8 @@ void ofApp::information(){
     }
     
     ofDrawBitmapString(reportStream.str(), 20, 652);
+    
+    ofPopStyle();
     
 }
 
