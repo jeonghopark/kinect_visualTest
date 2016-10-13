@@ -14,7 +14,7 @@
 
 using namespace milton;
 
-#define USE_VIDEO
+#define DEBUG_VIDEO
 
 
 class ofApp : public ofBaseApp {
@@ -34,7 +34,7 @@ public:
 	void mouseExited(int x, int y);
 	void windowResized(int w, int h);
 	
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
     ofVideoPlayer player;
 #else
     ofxKinect kinect;

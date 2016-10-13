@@ -18,7 +18,7 @@ void ofApp::setup() {
     bThreshWithOpenCV = true;
 
     
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
     player.load("debugMovie2016-10-13-21-25-05-560.mov");
     player.play();
     player.setLoopState(OF_LOOP_NORMAL);
@@ -106,7 +106,7 @@ void ofApp::update() {
     fpsView = ofToString(ofGetFrameRate(),2);
     
 
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
     player.update();
 
     if(player.isFrameNew()) {
@@ -131,9 +131,9 @@ void ofApp::update() {
         medianFilteredResult.mirror(false, true);
         
         finder.setSortBySize(true);
-        finder.setThreshold(threshold);
         finder.setMinAreaRadius(10);
         finder.setMaxAreaRadius(200);
+        finder.setThreshold(threshold);
         finder.findContours(medianFilteredResult);
         finder.setFindHoles(false);
         
@@ -172,7 +172,6 @@ void ofApp::update() {
             }
         }
 
-        
         unsigned char * data  = kinect.getDepthPixels().getData();
         unsigned char * pix = kinect.getDepthPixels().getData();
         for (int i = 0; i < 640*480; i++){
@@ -189,10 +188,9 @@ void ofApp::update() {
         medianFilteredResult.mirror(false, true);
         
         finder.setSortBySize(true);
-        finder.setThreshold(100);
         finder.setMinAreaRadius(10);
         finder.setMaxAreaRadius(200);
-        finder.setThreshold(127);
+        finder.setThreshold(threshold);
         finder.findContours(medianFilteredResult);
         finder.setFindHoles(false);
 
@@ -391,7 +389,7 @@ void ofApp::information(){
     << "set near threshold " << nearThreshold << " (press: + -)" << endl
     << "set far threshold " << farThreshold << endl;
     
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
     
 #else
     if(kinect.hasCamTiltControl()) {
@@ -455,7 +453,7 @@ void ofApp::keyPressed (int key) {
             break;
             
         case 'w':
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
             
 #else
             kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
@@ -483,7 +481,7 @@ void ofApp::keyPressed (int key) {
         case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
             
 #else
             kinect.setCameraTiltAngle(angle);
@@ -493,7 +491,7 @@ void ofApp::keyPressed (int key) {
         case OF_KEY_DOWN:
             angle--;
             if(angle<-30) angle=-30;
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
             
 #else
             kinect.setCameraTiltAngle(angle);
@@ -508,7 +506,7 @@ void ofApp::keyPressed (int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
     
 #else
     if(key=='r'){
@@ -566,6 +564,8 @@ void ofApp::mouseExited(int x, int y) {
     
 }
 
+
+
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h) {
     
@@ -579,7 +579,7 @@ void ofApp::windowResized(int w, int h) {
 //--------------------------------------------------------------
 void ofApp::exit() {
 
-#ifdef USE_VIDEO
+#ifdef DEBUG_VIDEO
     
 #else
     kinect.setCameraTiltAngle(0);
