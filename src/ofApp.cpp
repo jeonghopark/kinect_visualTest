@@ -36,6 +36,7 @@ void ofApp::setup() {
     
     gui.setup();
     gui.add(ctmffilterValue.setup("Filter", 15, 1, 30));
+    gui.add(invertColor.setup("Invert Color", false));
     gui.add(defaultColor.setup("Background Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(backGroundColor.setup("Shape Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     
@@ -60,10 +61,23 @@ void ofApp::setup() {
     medianFiltered = new unsigned char[640*480];
     medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     
-    
+    invertColor.addListener(this, &ofApp::changeColorButton);
 
 }
 
+
+//--------------------------------------------------------------
+void ofApp::changeColorButton(bool & t){
+    
+    if (invertColor) {
+        backGroundColor = ofColor(255);
+        defaultColor = ofColor(0);
+    } else {
+        backGroundColor = ofColor(0);
+        defaultColor = ofColor(255);
+    }
+    
+}
 
 
 
@@ -131,8 +145,10 @@ void ofApp::update() {
 
 
 
+
 //--------------------------------------------------------------
 void ofApp::draw() {
+    
     
     ofBackground(backGroundColor);
     

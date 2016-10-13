@@ -65,6 +65,7 @@ public:
     ofxColorSlider defaultColor;
     ofxColorSlider backGroundColor;
     ofxIntSlider ctmffilterValue;
+    ofxToggle invertColor;
     
     bool bDrawGui;
     
@@ -78,7 +79,7 @@ public:
     ofImage medianFilteredResult;
     ofxCv::ContourFinder finder;
 
-
+    void changeColorButton(bool & t);
 
 };
 
