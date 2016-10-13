@@ -35,6 +35,7 @@ void ofApp::setup() {
     
     
     gui.setup();
+    gui.add(fpsView.setup("fps", ""));
     gui.add(ctmffilterValue.setup("Filter", 15, 1, 30));
     gui.add(invertColor.setup("Invert Color", false));
     gui.add(defaultColor.setup("Background Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
@@ -85,6 +86,9 @@ void ofApp::changeColorButton(bool & t){
 
 //--------------------------------------------------------------
 void ofApp::update() {
+    
+    fpsView = ofToString(ofGetFrameRate(),2);
+    
     
     kinect.update();
     
@@ -228,8 +232,6 @@ void ofApp::draw() {
     
     
     
-    ofDrawBitmapString(ofToString(ofGetFrameRate(),2), 10, 10);
-    
     if (bDrawGui) {
         gui.draw();
     }
@@ -305,7 +307,7 @@ void ofApp::information(){
     
     reportStream << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
     << "set near threshold " << nearThreshold << " (press: + -)" << endl
-    << "set far threshold " << farThreshold << ", fps: " << ofGetFrameRate() << endl;
+    << "set far threshold " << farThreshold << endl;
     
     if(kinect.hasCamTiltControl()) {
         reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl

@@ -62,6 +62,7 @@ public:
     int kinectSizeOffSet;
     
     ofxPanel gui;
+    ofxLabel fpsView;
     ofxColorSlider defaultColor;
     ofxColorSlider backGroundColor;
     ofxIntSlider ctmffilterValue;
