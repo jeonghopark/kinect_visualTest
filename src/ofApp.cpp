@@ -16,15 +16,15 @@ void ofApp::setup() {
     
     kinect.init();
     kinect.open();
-    kinect.enableDepthNearValueWhite(false);
+    kinect.enableDepthNearValueWhite(true);
     
-    nearThreshold = 54;
-    farThreshold = 0;
+    nearThreshold = 252;
+    farThreshold = 195;
     bThreshWithOpenCV = true;
     
     ofSetFrameRate(60);
     
-    angle = 13;
+    angle = 0;
     kinect.setCameraTiltAngle(angle);
     
     drawShape.setup(20);
@@ -64,6 +64,19 @@ void ofApp::setup() {
     
     invertColor.addListener(this, &ofApp::changeColorButton);
 
+    
+    fileName = "debugMovie";
+    fileExt = ".mov";
+    vidRecorder.setVideoCodec("mpeg4");
+    vidRecorder.setVideoBitrate("800k");
+    vidRecorder.setPixelFormat("gray");
+    
+    ofAddListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
+    bRecording = false;
+//    soundStream.setup(this, 0, 2, 44100, 256, 4);
+
+    
+    
 }
 
 
@@ -93,6 +106,14 @@ void ofApp::update() {
     kinect.update();
     
     if(kinect.isFrameNew()) {
+        
+        if(bRecording){
+            bool success = vidRecorder.addFrame(kinect.getDepthPixels());
+            if (!success) {
+                ofLogWarning("This frame was not added!");
+            }
+        }
+
         
         unsigned char * data  = kinect.getDepthPixels().getData();
         unsigned char * pix = kinect.getDepthPixels().getData();
@@ -212,11 +233,17 @@ void ofApp::draw() {
                 ofPoint _diffV = _v2 -_v1;
                 float _degree = atan2(_diffV.y, _diffV.x);
                 ofTranslate(_v1.x, _v1.y, 0);
+                
                 ofRotateZDeg(ofRadToDeg(_degree) + 180);
                 int _index = i % silhoutteImg.size();
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
                 silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+
+                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
+
                 ofPopMatrix();
+                
+                
             }
             
         }
@@ -231,15 +258,10 @@ void ofApp::draw() {
     }
     
     
-    
     if (bDrawGui) {
         gui.draw();
     }
     
-    
-//    ofImage _test;
-//    _test.setFromPixels(recordBuff, 160, 120, OF_IMAGE_COLOR_ALPHA);
-//    _test.draw(100, 100);
     
 }
 
@@ -321,6 +343,17 @@ void ofApp::information(){
 }
 
 
+////--------------------------------------------------------------
+//void ofApp::audioIn(float *input, int bufferSize, int nChannels){
+//    if(bRecording)
+//        vidRecorder.addAudioSamples(input, bufferSize, nChannels);
+//}
+
+
+//--------------------------------------------------------------
+void ofApp::recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args){
+    cout << "The recoded video file is now complete." << endl;
+}
 
 
 
@@ -328,9 +361,6 @@ void ofApp::information(){
 void ofApp::keyPressed (int key) {
     
     switch (key) {
-
-        case 'r':
-            break;
 
         case 'f':
             break;
@@ -378,9 +408,6 @@ void ofApp::keyPressed (int key) {
             drawPointCloud.bLinesPointCloud = !drawPointCloud.bLinesPointCloud;
             break;
             
-        case 's':
-            break;
-
         case 'i':
             bInformation = !bInformation;
             bDrawGui = !bDrawGui;
@@ -405,6 +432,38 @@ void ofApp::keyPressed (int key) {
     }
     
 }
+
+
+
+//--------------------------------------------------------------
+void ofApp::keyReleased(int key){
+    
+    if(key=='r'){
+        bRecording = !bRecording;
+        if(bRecording && !vidRecorder.isInitialized()) {
+//            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 640, 480, 30, 44100, 2);
+            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 640, 480, 30); // no audio
+            //            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 0,0,0, sampleRate, channels); // no video
+            //          vidRecorder.setupCustomOutput(vidGrabber.getWidth(), vidGrabber.getHeight(), 30, sampleRate, channels, "-vcodec mpeg4 -b 1600k -acodec mp2 -ab 128k -f mpegts udp://localhost:1234"); // for custom ffmpeg output string (streaming, etc)
+            
+            // Start recording
+            vidRecorder.start();
+        }
+        else if(!bRecording && vidRecorder.isInitialized()) {
+            vidRecorder.setPaused(true);
+        }
+        else if(bRecording && vidRecorder.isInitialized()) {
+            vidRecorder.setPaused(false);
+        }
+    }
+    if(key=='s'){
+        bRecording = false;
+        vidRecorder.close();
+    }
+}
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
@@ -445,6 +504,10 @@ void ofApp::windowResized(int w, int h) {
 void ofApp::exit() {
     kinect.setCameraTiltAngle(0);
     kinect.close();
+    
+    ofRemoveListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
+    vidRecorder.close();
+
 }
 
 

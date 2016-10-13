@@ -5,6 +5,7 @@
 #include "ofxKinect.h"
 #include "ofxGui.h"
 #include "ofxCv.h"
+#include "ofxVideoRecorder.h"
 
 #include "ctmf.h"
 
@@ -24,6 +25,7 @@ public:
 	void exit();
 	    
 	void keyPressed(int key);
+    void keyReleased(int key);
 	void mouseDragged(int x, int y, int button);
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
@@ -31,6 +33,8 @@ public:
 	void mouseExited(int x, int y);
 	void windowResized(int w, int h);
 	
+//    void audioIn(float * input, int bufferSize, int nChannels);
+
 	ofxKinect kinect;
 		
 	bool bThreshWithOpenCV;
@@ -82,6 +86,17 @@ public:
 
     void changeColorButton(bool & t);
 
+    
+    ofxVideoRecorder    vidRecorder;
+//    ofSoundStream       soundStream;
+    bool bRecording;
+    string fileName;
+    string fileExt;
+    
+    void recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args);
+
+    
+    
 };
 
 
