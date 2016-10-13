@@ -180,24 +180,19 @@ void ofApp::draw() {
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();
             
-            
-            for (int i=0; i<_v.size()-1; i++) {
-                ofPoint _v1 = _polyLines.getPointAtPercent(i/100.0) * imageRatio;
-                ofPoint _v2 = _polyLines.getPointAtPercent((i+1)/100.0) * imageRatio;
-                
-                ofPushMatrix();
-                ofTranslate(_v1.x, _v1.y, 0);
-                ofRotateZDeg(90);
-                ofTranslate(-_v1.x, -_v1.y, 0);
-                ofDrawLine(_v1, _v2);
-                ofPopMatrix();
 
+            // FIXME: error up Points
+            for (int i=0; i<_v.size()-1; i++) {
+                float _step = 50;
+                float _ratioSize = 0.25;
+                ofPoint _v1 = _polyLines.getPointAtPercent(i/_step) * imageRatio;
+                ofPoint _v2 = _polyLines.getPointAtPercent((i+1)/_step) * imageRatio;
+            
                 ofPushMatrix();
                 ofPoint _diffV = _v2 -_v1;
                 float _degree = atan2(_diffV.y, _diffV.x);
                 ofTranslate(_v1.x, _v1.y, 0);
                 ofRotateZDeg(ofRadToDeg(_degree) + 180);
-                float _ratioSize = 0.18;
                 int _index = i % silhoutteImg.size();
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
                 silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
