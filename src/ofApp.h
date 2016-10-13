@@ -5,7 +5,6 @@
 #include "ofxKinect.h"
 #include "ofxGui.h"
 #include "ofxCv.h"
-#include "ofxAVFVideoRecorder.h"
 
 #include "ctmf.h"
 
@@ -80,9 +79,6 @@ public:
     ofxCv::ContourFinder finder;
 
 
-    ofxAVFVideoRecorder recorder;
-    bool recordVideo;
-    unsigned char * recordBuff;
 
 };
 

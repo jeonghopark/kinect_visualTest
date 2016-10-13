@@ -18,13 +18,13 @@ void ofApp::setup() {
     kinect.open();
     kinect.enableDepthNearValueWhite(false);
     
-    nearThreshold = 62;
-    farThreshold = 22;
+    nearThreshold = 54;
+    farThreshold = 0;
     bThreshWithOpenCV = true;
     
     ofSetFrameRate(60);
     
-    angle = 0;
+    angle = 13;
     kinect.setCameraTiltAngle(angle);
     
     drawShape.setup(20);
@@ -61,12 +61,6 @@ void ofApp::setup() {
     medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     
     
-    int width = 640;
-    int height = 480;
-    int framerate = 30;
-    string _timeS = ofGetTimestampString();
-    recorder.setup(ofToDataPath( _timeS + ".mov"), 160, 120, framerate);
-    recordBuff = new unsigned char[160*120*4];
 
 }
 
@@ -104,10 +98,10 @@ void ofApp::update() {
         finder.setThreshold(127);
         finder.findContours(medianFilteredResult);
         finder.setFindHoles(false);
+
         //        finder.findContours(medianFilteredResult);
         
         //        grayImage.flagImageChanged();
-        
         
         //        grayImage.setFromPixels(medianFiltered, 640, 480);
         
@@ -124,25 +118,6 @@ void ofApp::update() {
         //
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
 
-        
-        if(recordVideo) {
-            // ???: check char position
-            for (int j=0; j<120; j++){
-                for (int i=0; i<160; i++){
-                    int _index = (j * 4 * 160 + i) * 4;
-                    int _ind = (j * 160 + i) * 4;
-                    recordBuff[_ind] = medianFiltered[_index];
-                    recordBuff[_ind+1] = medianFiltered[_index];
-                    recordBuff[_ind+2] = medianFiltered[_index];
-                    if (medianFiltered[_index]!=0) {
-                        recordBuff[_ind+3] = 255;
-                    } else {
-                        recordBuff[_ind+3] = 0;
-                    }
-                }
-            }
-            recorder.writeRGBA(recordBuff);
-        }
         
         
         
@@ -205,12 +180,6 @@ void ofApp::draw() {
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();
             
-            for (int i=0; i<_v.size(); i++) {
-                float _ratioSize = 0.18;
-                int _index = i % silhoutteImg.size();
-//                silhoutteImg[_index].draw(_polyLines.getPointAtPercent(i/100.0) * imageRatio, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
-            }
-
             
             for (int i=0; i<_v.size()-1; i++) {
                 ofPoint _v1 = _polyLines.getPointAtPercent(i/100.0) * imageRatio;
@@ -348,11 +317,9 @@ void ofApp::keyPressed (int key) {
     switch (key) {
 
         case 'r':
-            recordVideo = !recordVideo;
             break;
 
         case 'f':
-            recorder.finishMovie();
             break;
 
         case ' ':
@@ -399,7 +366,6 @@ void ofApp::keyPressed (int key) {
             break;
             
         case 's':
-            recorder.setup(ofToDataPath(ofGetTimestampString() + ".mov"), 160, 120, 30);
             break;
 
         case 'i':
