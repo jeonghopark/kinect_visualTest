@@ -9,23 +9,27 @@ using namespace cv;
 void ofApp::setup() {
     
     ofSetLogLevel(OF_LOG_VERBOSE);
-    
     ofBackground(0);
-    
-    kinect.setRegistration(true);
-    
-    kinect.init();
-    kinect.open();
-    kinect.enableDepthNearValueWhite(true);
-    
-    nearThreshold = 252;
-    farThreshold = 195;
-    bThreshWithOpenCV = true;
-    
     ofSetFrameRate(60);
     
     angle = 0;
+    nearThreshold = 252;
+    farThreshold = 195;
+    bThreshWithOpenCV = true;
+
+    
+#ifdef USE_VIDEO
+    player.load("debugMovie2016-10-13-21-25-05-560.mov");
+    player.play();
+    player.setLoopState(OF_LOOP_NORMAL);
+#else
+    kinect.setRegistration(true);
+    kinect.init();
+    kinect.open();
+    kinect.enableDepthNearValueWhite(true);
     kinect.setCameraTiltAngle(angle);
+#endif
+
     
     drawShape.setup(20);
     
@@ -37,6 +41,7 @@ void ofApp::setup() {
     gui.setup();
     gui.add(fpsView.setup("fps", ""));
     gui.add(ctmffilterValue.setup("Filter", 15, 1, 30));
+    gui.add(threshold.setup("Threshold", 15, 0, 255));
     gui.add(invertColor.setup("Invert Color", false));
     gui.add(defaultColor.setup("Background Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(backGroundColor.setup("Shape Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
@@ -73,8 +78,6 @@ void ofApp::setup() {
     
     ofAddListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
     bRecording = false;
-//    soundStream.setup(this, 0, 2, 44100, 256, 4);
-
     
     
 }
@@ -102,7 +105,62 @@ void ofApp::update() {
     
     fpsView = ofToString(ofGetFrameRate(),2);
     
+
+#ifdef USE_VIDEO
+    player.update();
+
+    if(player.isFrameNew()) {
+        
+        unsigned char * data  = player.getPixels().getData();
+        unsigned char * pix = player.getPixels().getData();
+//        for (int i = 0; i <640*480; i++){
+//            graypixels[i] = data[i*3];
+//        }
+
+        for (int i = 0; i<640*480; i++){
+            if(pix[i*3] < nearThreshold && pix[i*3] > farThreshold) {
+                graypixels[i] = 255;
+            } else {
+                graypixels[i] = 0;
+            }
+        }
+        
+        ctmf(graypixels, medianFiltered, 640, 480, 640, 640, ctmffilterValue, 1);
+        
+        medianFilteredResult.setFromPixels(medianFiltered, 640, 480, OF_IMAGE_GRAYSCALE);
+        medianFilteredResult.mirror(false, true);
+        
+        finder.setSortBySize(true);
+        finder.setThreshold(threshold);
+        finder.setMinAreaRadius(10);
+        finder.setMaxAreaRadius(200);
+        finder.findContours(medianFilteredResult);
+        finder.setFindHoles(false);
+        
+        //        finder.findContours(medianFilteredResult);
+        
+        //        grayImage.flagImageChanged();
+        
+        //        grayImage.setFromPixels(medianFiltered, 640, 480);
+        
+        //        ofPixels & pix = grayImage.getPixels();
+        //        int numPixels = pix.size();
+        //        for(int i = 0; i < numPixels; i++) {
+        //            if(pix[i] < nearThreshold && pix[i] > farThreshold) {
+        //                pix[i] = 255;
+        //            } else {
+        //                pix[i] = 0;
+        //            }
+        //        }
+        //
+        //
+        //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
+
+    }
+
     
+#else
+
     kinect.update();
     
     if(kinect.isFrameNew()) {
@@ -162,7 +220,8 @@ void ofApp::update() {
         
     }
     
-    
+#endif
+
     //    drawShape.update();
     
 }
@@ -181,17 +240,18 @@ void ofApp::draw() {
         drawTransImg(medianFilteredResult);
     }
     
-    easyCam.begin();
-    drawPointCloud.drawPointCloud(kinect, defaultColor);
-    drawPointCloud.drawLinesCloud(kinect, defaultColor);
-    easyCam.end();
+//    easyCam.begin();
+//    drawPointCloud.drawPointCloud(kinect, defaultColor);
+//    drawPointCloud.drawLinesCloud(kinect, defaultColor);
+//    easyCam.end();
 
     //    if (bDrawShape) {
     //        drawShape.drawMovingLines(defaultColor);
     //    }
     
 //    medianFilteredResult.draw(0, 0);
-    
+//    player.draw(0, 0);
+
     
     if (finder.size() > 0){
         ofPushMatrix();
@@ -331,10 +391,14 @@ void ofApp::information(){
     << "set near threshold " << nearThreshold << " (press: + -)" << endl
     << "set far threshold " << farThreshold << endl;
     
+#ifdef USE_VIDEO
+    
+#else
     if(kinect.hasCamTiltControl()) {
         reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
         << "press 1-5 & 0 to change the led mode" << endl;
     }
+#endif
     
     ofDrawBitmapString(reportStream.str(), 20, 652);
     
@@ -342,12 +406,6 @@ void ofApp::information(){
     
 }
 
-
-////--------------------------------------------------------------
-//void ofApp::audioIn(float *input, int bufferSize, int nChannels){
-//    if(bRecording)
-//        vidRecorder.addAudioSamples(input, bufferSize, nChannels);
-//}
 
 
 //--------------------------------------------------------------
@@ -397,7 +455,11 @@ void ofApp::keyPressed (int key) {
             break;
             
         case 'w':
+#ifdef USE_VIDEO
+            
+#else
             kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
+#endif
             break;
             
         case 'c':
@@ -421,13 +483,21 @@ void ofApp::keyPressed (int key) {
         case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
+#ifdef USE_VIDEO
+            
+#else
             kinect.setCameraTiltAngle(angle);
+#endif
             break;
             
         case OF_KEY_DOWN:
             angle--;
             if(angle<-30) angle=-30;
+#ifdef USE_VIDEO
+            
+#else
             kinect.setCameraTiltAngle(angle);
+#endif
             break;
     }
     
@@ -438,10 +508,13 @@ void ofApp::keyPressed (int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
+#ifdef USE_VIDEO
+    
+#else
     if(key=='r'){
         bRecording = !bRecording;
         if(bRecording && !vidRecorder.isInitialized()) {
-//            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 640, 480, 30, 44100, 2);
+            //            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 640, 480, 30, 44100, 2);
             vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 640, 480, 30); // no audio
             //            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, 0,0,0, sampleRate, channels); // no video
             //          vidRecorder.setupCustomOutput(vidGrabber.getWidth(), vidGrabber.getHeight(), 30, sampleRate, channels, "-vcodec mpeg4 -b 1600k -acodec mp2 -ab 128k -f mpegts udp://localhost:1234"); // for custom ffmpeg output string (streaming, etc)
@@ -460,6 +533,9 @@ void ofApp::keyReleased(int key){
         bRecording = false;
         vidRecorder.close();
     }
+
+#endif
+
 }
 
 
@@ -502,8 +578,13 @@ void ofApp::windowResized(int w, int h) {
 
 //--------------------------------------------------------------
 void ofApp::exit() {
+
+#ifdef USE_VIDEO
+    
+#else
     kinect.setCameraTiltAngle(0);
     kinect.close();
+#endif
     
     ofRemoveListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
     vidRecorder.close();

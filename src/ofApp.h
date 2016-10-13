@@ -14,6 +14,7 @@
 
 using namespace milton;
 
+#define USE_VIDEO
 
 
 class ofApp : public ofBaseApp {
@@ -33,9 +34,11 @@ public:
 	void mouseExited(int x, int y);
 	void windowResized(int w, int h);
 	
-//    void audioIn(float * input, int bufferSize, int nChannels);
-
-	ofxKinect kinect;
+#ifdef USE_VIDEO
+    ofVideoPlayer player;
+#else
+    ofxKinect kinect;
+#endif
 		
 	bool bThreshWithOpenCV;
 	
@@ -70,6 +73,7 @@ public:
     ofxColorSlider defaultColor;
     ofxColorSlider backGroundColor;
     ofxIntSlider ctmffilterValue;
+    ofxIntSlider threshold;
     ofxToggle invertColor;
     
     bool bDrawGui;
