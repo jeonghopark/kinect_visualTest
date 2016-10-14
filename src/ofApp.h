@@ -6,7 +6,6 @@
 #include "ofxGui.h"
 #include "ofxCv.h"
 #include "ofxVideoRecorder.h"
-
 #include "ctmf.h"
 
 #include "DrawPointCloud.hpp"
@@ -98,9 +97,11 @@ public:
     string fileExt;
     
     void recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args);
-
+  
     
-    
+    ofxCv::KalmanPosition kalman;
+    ofxCv::KalmanPosition kalman2;
+    ofPoint point1, point2;
 };
 
 

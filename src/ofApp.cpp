@@ -80,6 +80,9 @@ void ofApp::setup() {
     bRecording = false;
     
     
+    kalman.init(1/10000., 1/10.); // inverse of (smoothness, rapidness)
+    kalman2.init(1/10000., 1/10.); // inverse of (smoothness, rapidness)
+    
 }
 
 
@@ -274,15 +277,26 @@ void ofApp::draw() {
             // FIXME: error up Points
             int _step = 20;
             float _ratioSize = 0.25;
+
+            
             for (int i=1; i<_v.size()-1; i+=_step) {
                 
                 ofPoint _v1 = _polyLines.getPointAtPercent(i / float(_v.size())) * imageRatio;
                 ofPoint _v2 = _polyLines.getPointAtPercent((i+1) / float(_v.size())) * imageRatio;
             
                 ofPushMatrix();
-
-                ofPoint _diffV = _v2 -_v1;
-                ofTranslate(_v1.x, _v1.y, 0);
+                
+                glm::vec3 curPoint1(_v1.x, _v1.y, 0);
+                glm::vec3 curPoint2(_v2.x, _v2.y, 0);
+                
+                kalman.update(curPoint1); // feed measurement
+                kalman2.update(curPoint2); // feed measurement
+                
+                point1 = kalman.getPrediction(); // prediction before measurement
+                point2 = kalman2.getPrediction(); // prediction before measurement
+                
+                ofPoint _diffV = point2 - point1;
+                ofTranslate(point1.x, point1.y, 0);
                 
                 float _degree = atan2(_diffV.y, _diffV.x);
                 ofRotateZDeg(ofRadToDeg(_degree) + 180);
@@ -295,7 +309,7 @@ void ofApp::draw() {
 //                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
 
                 ofPopMatrix();
-                
+
             }
             
         }
