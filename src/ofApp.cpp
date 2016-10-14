@@ -251,15 +251,6 @@ void ofApp::draw() {
 //    player.draw(0, 0);
 
     
-    if (finder.size() > 0){
-        ofPushMatrix();
-        ofTranslate(0, 0);
-        for (int j=0; j<finder.size(); j++) {
-            //            finder.getPolyline(j).draw();
-        }
-        ofPopMatrix();
-    }
-    
     
     if (finder.size()>0 && bContourDraw) {
         ofPushMatrix();
@@ -281,26 +272,29 @@ void ofApp::draw() {
             
 
             // FIXME: error up Points
-            for (int i=0; i<_v.size()-1; i++) {
-                float _step = 50;
-                float _ratioSize = 0.25;
-                ofPoint _v1 = _polyLines.getPointAtPercent(i/_step) * imageRatio;
-                ofPoint _v2 = _polyLines.getPointAtPercent((i+1)/_step) * imageRatio;
+            int _step = 20;
+            float _ratioSize = 0.25;
+            for (int i=1; i<_v.size()-1; i+=_step) {
+                
+                ofPoint _v1 = _polyLines.getPointAtPercent(i / float(_v.size())) * imageRatio;
+                ofPoint _v2 = _polyLines.getPointAtPercent((i+1) / float(_v.size())) * imageRatio;
             
                 ofPushMatrix();
+
                 ofPoint _diffV = _v2 -_v1;
-                float _degree = atan2(_diffV.y, _diffV.x);
                 ofTranslate(_v1.x, _v1.y, 0);
                 
+                float _degree = atan2(_diffV.y, _diffV.x);
                 ofRotateZDeg(ofRadToDeg(_degree) + 180);
-                int _index = i % silhoutteImg.size();
+                
+                int _index = (i/_step) % silhoutteImg.size();
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
+
                 silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
 
-                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
+//                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
 
                 ofPopMatrix();
-                
                 
             }
             
