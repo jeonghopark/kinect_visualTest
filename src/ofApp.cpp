@@ -271,10 +271,10 @@ void ofApp::draw() {
             vector<glm::vec3> _v = _polyLines.getVertices();
             
 
-            // FIXME: error up Points
             int _step = 20;
             float _ratioSize = 0.25;
-            for (int i=1; i<_v.size()-1; i+=_step) {
+            
+            for (int i=0; i<_v.size()-1; i+=_step) {
                 
                 ofPoint _v1 = _polyLines.getPointAtPercent(i / float(_v.size())) * imageRatio;
                 ofPoint _v2 = _polyLines.getPointAtPercent((i+1) / float(_v.size())) * imageRatio;
@@ -289,11 +289,11 @@ void ofApp::draw() {
                 
                 int _index = (i/_step) % silhoutteImg.size();
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
-
+                
                 silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
-
-//                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
-
+                
+                //                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
+                
                 ofPopMatrix();
                 
             }
