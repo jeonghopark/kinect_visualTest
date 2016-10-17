@@ -58,6 +58,7 @@ public:
     bool bContourDraw;
     
     void drawTransImg(ofImage _img);
+    void drawTransShadowImg(ofImage _img);
     
     DrawShape drawShape;
     bool bDrawShape;

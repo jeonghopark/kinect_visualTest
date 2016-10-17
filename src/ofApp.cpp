@@ -45,7 +45,7 @@ void ofApp::setup() {
     gui.add(invertColor.setup("Invert Color", false));
     gui.add(backGroundColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(shapeColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(smallFigureColor.setup("Small Figure Color", ofColor(180, 180), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     
     
     
@@ -238,6 +238,7 @@ void ofApp::draw() {
     ofBackground(backGroundColor);
     
     if (bCVDraw) {
+        drawTransShadowImg(medianFilteredResult);
         drawTransImg(medianFilteredResult);
     }
     
@@ -356,6 +357,38 @@ void ofApp::drawTransImg(ofImage _img){
     _transImg.update();
     _transImg.draw(0, -kinectSizeOffSet, ofGetWindowSize().x + kinectSizeOffSet, ofGetWindowSize().y + kinectSizeOffSet);
 
+
+}
+
+
+
+
+//--------------------------------------------------------------
+void ofApp::drawTransShadowImg(ofImage _img){
+    
+    ofImage _transSImg;
+    _transSImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+    
+    ofPixels & pix = _img.getPixels();
+    ofPixels & pixST = _transSImg.getPixels();
+    int numPixels = pix.size();
+    for(int i = 0; i < numPixels; i++) {
+        if(pix[i] > 200) {
+            ofColor _c = shapeColor;
+            pixST[i*4+0] = _c.r;
+            pixST[i*4+1] = _c.g;
+            pixST[i*4+2] = _c.b;
+            pixST[i*4+3] = 120;
+        } else {
+            pixST[i*4+0] = pix[i];
+            pixST[i*4+1] = 125;
+            pixST[i*4+2] = 125;
+            pixST[i*4+3] = 0;
+        }
+    }
+    
+    _transSImg.update();
+    _transSImg.draw(-kinectSizeOffSet * 1.05 * 0.5, -kinectSizeOffSet-kinectSizeOffSet * 1.05 * 0.5, (ofGetWindowSize().x + kinectSizeOffSet) * 1.05, (ofGetWindowSize().y + kinectSizeOffSet) * 1.05);
 
 }
 
