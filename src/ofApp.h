@@ -70,8 +70,9 @@ public:
     
     ofxPanel gui;
     ofxLabel fpsView;
-    ofxColorSlider defaultColor;
+    ofxColorSlider shapeColor;
     ofxColorSlider backGroundColor;
+    ofxColorSlider smallFigureColor;
     ofxIntSlider ctmffilterValue;
     ofxIntSlider threshold;
     ofxToggle invertColor;

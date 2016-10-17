@@ -12,9 +12,9 @@ void ofApp::setup() {
     ofBackground(0);
     ofSetFrameRate(60);
     
-    angle = 0;
-    nearThreshold = 252;
-    farThreshold = 195;
+    nearThreshold = 246;
+    farThreshold = 203;
+    angle = 16;
     bThreshWithOpenCV = true;
 
     
@@ -40,11 +40,12 @@ void ofApp::setup() {
     
     gui.setup();
     gui.add(fpsView.setup("fps", ""));
-    gui.add(ctmffilterValue.setup("Filter", 15, 1, 30));
+    gui.add(ctmffilterValue.setup("Filter", 10, 1, 30));
     gui.add(threshold.setup("Threshold", 15, 0, 255));
     gui.add(invertColor.setup("Invert Color", false));
-    gui.add(defaultColor.setup("Background Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(backGroundColor.setup("Shape Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(backGroundColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(shapeColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     
     
     
@@ -88,10 +89,12 @@ void ofApp::changeColorButton(bool & t){
     
     if (invertColor) {
         backGroundColor = ofColor(255);
-        defaultColor = ofColor(0);
+        shapeColor = ofColor(0);
+        smallFigureColor = ofColor(0);
     } else {
         backGroundColor = ofColor(0);
-        defaultColor = ofColor(255);
+        shapeColor = ofColor(255);
+        smallFigureColor = ofColor(255);
     }
     
 }
@@ -239,12 +242,12 @@ void ofApp::draw() {
     }
     
 //    easyCam.begin();
-//    drawPointCloud.drawPointCloud(kinect, defaultColor);
-//    drawPointCloud.drawLinesCloud(kinect, defaultColor);
+//    drawPointCloud.drawPointCloud(kinect, shapeColor);
+//    drawPointCloud.drawLinesCloud(kinect, shapeColor);
 //    easyCam.end();
 
     //    if (bDrawShape) {
-    //        drawShape.drawMovingLines(defaultColor);
+    //        drawShape.drawMovingLines(shapeColor);
     //    }
     
 //    medianFilteredResult.draw(0, 0);
@@ -257,7 +260,7 @@ void ofApp::draw() {
         ofPushStyle();
         ofSetRectMode(OF_RECTMODE_CENTER);
         
-        ofSetColor(defaultColor);
+        ofSetColor(shapeColor);
         
         ofTranslate(0, -kinectSizeOffSet);
         
@@ -271,7 +274,7 @@ void ofApp::draw() {
             vector<glm::vec3> _v = _polyLines.getVertices();
             
 
-            int _step = 20;
+            int _step = 10;
             float _ratioSize = 0.25;
             
             for (int i=0; i<_v.size()-1; i+=_step) {
@@ -287,10 +290,14 @@ void ofApp::draw() {
                 float _degree = atan2(_diffV.y, _diffV.x);
                 ofRotateZDeg(ofRadToDeg(_degree) + 180);
                 
-                int _index = (i/_step) % silhoutteImg.size();
+                int _index = 5;
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
                 
+                ofPushStyle();
+                ofSetColor(smallFigureColor);
                 silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                
+                ofPopStyle();
                 
                 //                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
                 
@@ -333,7 +340,7 @@ void ofApp::drawTransImg(ofImage _img){
     int numPixels = pix.size();
     for(int i = 0; i < numPixels; i++) {
         if(pix[i] > 200) {
-            ofColor _c = defaultColor;
+            ofColor _c = shapeColor;
             pixT[i*4+0] = _c.r;
             pixT[i*4+1] = _c.g;
             pixT[i*4+2] = _c.b;
