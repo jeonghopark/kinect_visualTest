@@ -12,18 +12,18 @@ void ofApp::setup() {
     ofBackground(0);
     ofSetFrameRate(60);
     
-    nearThreshold = 246;
-    farThreshold = 203;
-    angle = 16;
+    nearThreshold = 200;
+    farThreshold = 0;
+    angle = 20;
     bThreshWithOpenCV = true;
 
     
 #ifdef DEBUG_VIDEO
-    player.load("debugMovie2016-10-13-21-25-05-560.mov");
+    player.load("debugMovie2016-10-21-13-46-36-064.mov");
     player.play();
     player.setLoopState(OF_LOOP_NORMAL);
 #else
-    kinect.setRegistration(true);
+    kinect.setRegistration(false);
     kinect.init();
     kinect.open();
     kinect.enableDepthNearValueWhite(true);
@@ -33,19 +33,18 @@ void ofApp::setup() {
     
     drawShape.setup(20);
     
-    kinectSizeOffSet = 80;
-    imageRatio.x = (ofGetWindowSize().x + kinectSizeOffSet) / 640.0;
-    imageRatio.y = (ofGetWindowSize().y + kinectSizeOffSet) / 480.0;
+    imageRatio.x = ofGetWindowSize().y / 480.0;
+    imageRatio.y = ofGetWindowSize().y / 480.0;
     
     
     gui.setup();
     gui.add(fpsView.setup("fps", ""));
-    gui.add(ctmffilterValue.setup("Filter", 10, 1, 30));
+    gui.add(ctmffilterValue.setup("Filter", 5, 1, 30));
     gui.add(threshold.setup("Threshold", 15, 0, 255));
     gui.add(invertColor.setup("Invert Color", false));
     gui.add(backGroundColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(shapeColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(smallFigureColor.setup("Small Figure Color", ofColor(180, 180), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     
     
     
@@ -224,7 +223,7 @@ void ofApp::update() {
 #endif
 
     //    drawShape.update();
-    
+        
 }
 
 
@@ -238,7 +237,7 @@ void ofApp::draw() {
     ofBackground(backGroundColor);
     
     if (bCVDraw) {
-        drawTransShadowImg(medianFilteredResult);
+//        drawTransShadowImg(medianFilteredResult);
         drawTransImg(medianFilteredResult);
     }
     
@@ -250,6 +249,9 @@ void ofApp::draw() {
     //    if (bDrawShape) {
     //        drawShape.drawMovingLines(shapeColor);
     //    }
+    
+    
+//    kinect.drawDepth(0, 0);
     
 //    medianFilteredResult.draw(0, 0);
 //    player.draw(0, 0);
@@ -263,11 +265,11 @@ void ofApp::draw() {
         
         ofSetColor(shapeColor);
         
-        ofTranslate(0, -kinectSizeOffSet);
+        ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0);
         
         for (int j=0; j<finder.size(); j++) {
             ofPushMatrix();
-            ofScale(imageRatio.x, imageRatio.y, 0);
+            ofScale(0, 0, 0);
             finder.getPolyline(j).draw();
             ofPopMatrix();
             
@@ -332,6 +334,10 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::drawTransImg(ofImage _img){
 
+    ofPushMatrix();
+    
+    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0);
+    
     ofImage _transImg;
 
     _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
@@ -355,8 +361,10 @@ void ofApp::drawTransImg(ofImage _img){
     }
 
     _transImg.update();
-    _transImg.draw(0, -kinectSizeOffSet, ofGetWindowSize().x + kinectSizeOffSet, ofGetWindowSize().y + kinectSizeOffSet);
+    _transImg.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
 
+    
+    ofPopMatrix();
 
 }
 
@@ -624,8 +632,3 @@ void ofApp::exit() {
     vidRecorder.close();
 
 }
-
-
-
-
-
