@@ -22,20 +22,21 @@ void ofApp::setup() {
     player.load("debugMovie2016-10-21-13-46-36-064.mov");
     player.play();
     player.setLoopState(OF_LOOP_NORMAL);
+    imageRatio.y = ofGetWindowSize().y / player.getHeight();
+    imageRatio.x = imageRatio.y;
 #else
     kinect.setRegistration(false);
     kinect.init();
     kinect.open();
     kinect.enableDepthNearValueWhite(true);
     kinect.setCameraTiltAngle(angle);
+    imageRatio.y = ofGetWindowSize().y / kinect.getHeight();
+    imageRatio.x = imageRatio.y;
 #endif
 
     
     drawShape.setup(20);
-    
-    imageRatio.x = ofGetWindowSize().y / 480.0;
-    imageRatio.y = ofGetWindowSize().y / 480.0;
-    
+
     
     gui.setup();
     gui.add(fpsView.setup("fps", ""));
@@ -611,9 +612,14 @@ void ofApp::mouseExited(int x, int y) {
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h) {
     
-    imageRatio.x = (ofGetWindowSize().x + kinectSizeOffSet) / 640.0;
-    imageRatio.y = (ofGetWindowSize().y + kinectSizeOffSet) / 480.0;
-    
+#ifdef DEBUG_VIDEO
+    imageRatio.y = ofGetWindowSize().y / player.getHeight();
+    imageRatio.x = imageRatio.y;
+#else
+    imageRatio.y = ofGetWindowSize().y / kinect.getHeight();
+    imageRatio.x = imageRatio.y;
+#endif
+
 }
 
 
