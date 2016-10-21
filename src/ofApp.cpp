@@ -430,11 +430,9 @@ void ofApp::information(){
     
     reportStream << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
     << "set near threshold " << nearThreshold << " (press: + -)" << endl
-    << "set far threshold " << farThreshold << endl;
+    << "set far threshold " << farThreshold <<  " (press: < >)" << endl;
     
-#ifdef DEBUG_VIDEO
-    
-#else
+#ifndef DEBUG_VIDEO
     if(kinect.hasCamTiltControl()) {
         reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
         << "press 1-5 & 0 to change the led mode" << endl;
@@ -496,9 +494,7 @@ void ofApp::keyPressed (int key) {
             break;
             
         case 'w':
-#ifdef DEBUG_VIDEO
-            
-#else
+#ifndef DEBUG_VIDEO
             kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
 #endif
             break;
@@ -524,9 +520,7 @@ void ofApp::keyPressed (int key) {
         case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
-#ifdef DEBUG_VIDEO
-            
-#else
+#ifndef DEBUG_VIDEO
             kinect.setCameraTiltAngle(angle);
 #endif
             break;
@@ -534,9 +528,7 @@ void ofApp::keyPressed (int key) {
         case OF_KEY_DOWN:
             angle--;
             if(angle<-30) angle=-30;
-#ifdef DEBUG_VIDEO
-            
-#else
+#ifndef DEBUG_VIDEO
             kinect.setCameraTiltAngle(angle);
 #endif
             break;
@@ -549,9 +541,9 @@ void ofApp::keyPressed (int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
-#ifdef DEBUG_VIDEO
+
+#ifndef DEBUG_VIDEO
     
-#else
     if(key=='r'){
         bRecording = !bRecording;
         if(bRecording && !vidRecorder.isInitialized()) {
@@ -574,9 +566,10 @@ void ofApp::keyReleased(int key){
         bRecording = false;
         vidRecorder.close();
     }
-
+    
 #endif
 
+    
 }
 
 
