@@ -239,7 +239,13 @@ void ofApp::draw() {
     
     if (bCVDraw) {
 //        drawTransShadowImg(medianFilteredResult);
-        drawTransImg(medianFilteredResult);
+//        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//        drawTransImg(medianFilteredResult);
+        drawTransImgColor(medianFilteredResult, ofColor(0,0,255), ofPoint(0,0));
+        drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0));
+        drawTransImgColor(medianFilteredResult, ofColor(0,255,0), ofPoint(100,0));
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
     }
     
 //    easyCam.begin();
@@ -367,6 +373,45 @@ void ofApp::drawTransImg(ofImage _img){
     
     ofPopMatrix();
 
+}
+
+
+
+
+//--------------------------------------------------------------
+void ofApp::drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos){
+    
+    ofPushMatrix();
+    
+    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5 + _pos.x, 0 + _pos.y);
+    
+    ofImage _transImg;
+    
+    _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+    
+    ofPixels & pix = _img.getPixels();
+    ofPixels & pixT = _transImg.getPixels();
+    int numPixels = pix.size();
+    for(int i = 0; i < numPixels; i++) {
+        if(pix[i] > 200) {
+            pixT[i*4+0] = _c.r;
+            pixT[i*4+1] = _c.g;
+            pixT[i*4+2] = _c.b;
+            pixT[i*4+3] = _c.a;
+        } else {
+            pixT[i*4+0] = pix[i];
+            pixT[i*4+1] = 255;
+            pixT[i*4+2] = 255;
+            pixT[i*4+3] = 0;
+        }
+    }
+    
+    _transImg.update();
+    _transImg.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
+    
+    
+    ofPopMatrix();
+    
 }
 
 
