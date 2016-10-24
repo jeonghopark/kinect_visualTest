@@ -9,14 +9,15 @@ using namespace cv;
 void ofApp::setup() {
     
     ofSetLogLevel(OF_LOG_VERBOSE);
-    ofBackground(0);
+    ofBackground(40);
     ofSetFrameRate(60);
     
     nearThreshold = 200;
     farThreshold = 0;
     angle = 20;
     bThreshWithOpenCV = true;
-
+    
+    
     
 #ifdef DEBUG_VIDEO
     player.load("debugMovie2016-10-21-13-46-36-064.mov");
@@ -33,10 +34,13 @@ void ofApp::setup() {
     imageRatio.y = ofGetWindowSize().y / kinect.getHeight();
     imageRatio.x = imageRatio.y;
 #endif
-
+    
+    
+    psBlend.setup(player.getHeight() * imageRatio.x, player.getWidth() * imageRatio.y);
+    blendMode = 0;
     
     drawShape.setup(20);
-
+    
     
     gui.setup();
     gui.add(fpsView.setup("fps", ""));
@@ -69,7 +73,7 @@ void ofApp::setup() {
     medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     
     invertColor.addListener(this, &ofApp::changeColorButton);
-
+    
     
     fileName = "debugMovie";
     fileExt = ".mov";
@@ -108,18 +112,18 @@ void ofApp::update() {
     
     fpsView = ofToString(ofGetFrameRate(),2);
     
-
+    
 #ifdef DEBUG_VIDEO
     player.update();
-
+    
     if(player.isFrameNew()) {
         
         unsigned char * data  = player.getPixels().getData();
         unsigned char * pix = player.getPixels().getData();
-//        for (int i = 0; i <640*480; i++){
-//            graypixels[i] = data[i*3];
-//        }
-
+        //        for (int i = 0; i <640*480; i++){
+        //            graypixels[i] = data[i*3];
+        //        }
+        
         for (int i = 0; i<640*480; i++){
             if(pix[i*3] < nearThreshold && pix[i*3] > farThreshold) {
                 graypixels[i] = 255;
@@ -158,12 +162,12 @@ void ofApp::update() {
         //
         //
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
-
+        
     }
-
+    
     
 #else
-
+    
     kinect.update();
     
     if(kinect.isFrameNew()) {
@@ -174,7 +178,7 @@ void ofApp::update() {
                 ofLogWarning("This frame was not added!");
             }
         }
-
+        
         unsigned char * data  = kinect.getDepthPixels().getData();
         unsigned char * pix = kinect.getDepthPixels().getData();
         for (int i = 0; i < 640*480; i++){
@@ -184,7 +188,7 @@ void ofApp::update() {
                 pix[i] = 0;
             }
         }
-
+        
         ctmf(pix, medianFiltered, 640, 480, 640, 640, ctmffilterValue, 1);
         
         medianFilteredResult.setFromPixels(medianFiltered, 640, 480, OF_IMAGE_GRAYSCALE);
@@ -196,7 +200,7 @@ void ofApp::update() {
         finder.setThreshold(threshold);
         finder.findContours(medianFilteredResult);
         finder.setFindHoles(false);
-
+        
         //        finder.findContours(medianFilteredResult);
         
         //        grayImage.flagImageChanged();
@@ -215,16 +219,23 @@ void ofApp::update() {
         //
         //
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
-
+        
         
         
         
     }
     
 #endif
-
+    
     //    drawShape.update();
-        
+    
+    ofPushMatrix();
+    psBlend.begin();
+    //    drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0));
+    drawTransColorImage(medianFilteredResult, ofColor(255), ofPoint(0,0)).draw(0, 0);
+    psBlend.end();
+    ofPopMatrix();
+    
 }
 
 
@@ -237,42 +248,48 @@ void ofApp::draw() {
     
     ofBackground(backGroundColor);
     
+    
+    
+    ofPushMatrix();
+    
+    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
+    
     if (bCVDraw) {
-//        drawTransShadowImg(medianFilteredResult);
-//        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-//        drawTransImg(medianFilteredResult);
-        drawTransImgColor(medianFilteredResult, ofColor(0,0,255), ofPoint(0,0));
-        drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0));
-        drawTransImgColor(medianFilteredResult, ofColor(0,255,0), ofPoint(100,0));
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        //        drawTransShadowImg(medianFilteredResult);
+        //        drawTransImg(medianFilteredResult);
+        //        drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0));
+        
+        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0)).getTexture(), blendMode);
     }
     
-//    easyCam.begin();
-//    drawPointCloud.drawPointCloud(kinect, shapeColor);
-//    drawPointCloud.drawLinesCloud(kinect, shapeColor);
-//    easyCam.end();
-
+    ofPopMatrix();
+    
+    //    easyCam.begin();
+    //    drawPointCloud.drawPointCloud(kinect, shapeColor);
+    //    drawPointCloud.drawLinesCloud(kinect, shapeColor);
+    //    easyCam.end();
+    
     //    if (bDrawShape) {
     //        drawShape.drawMovingLines(shapeColor);
     //    }
     
     
-//    kinect.drawDepth(0, 0);
+    //    kinect.drawDepth(0, 0);
     
-//    medianFilteredResult.draw(0, 0);
-//    player.draw(0, 0);
-
+    //    medianFilteredResult.draw(0, 0);
+    //    player.draw(0, 0);
+    
     
     
     if (finder.size()>0 && bContourDraw) {
         ofPushMatrix();
+        
+        ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
+        
         ofPushStyle();
         ofSetRectMode(OF_RECTMODE_CENTER);
         
         ofSetColor(shapeColor);
-        
-        ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0);
         
         for (int j=0; j<finder.size(); j++) {
             ofPushMatrix();
@@ -283,7 +300,6 @@ void ofApp::draw() {
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();
             
-
             int _step = 10;
             float _ratioSize = 0.25;
             
@@ -291,9 +307,9 @@ void ofApp::draw() {
                 
                 ofPoint _v1 = _polyLines.getPointAtPercent(i / float(_v.size())) * imageRatio;
                 ofPoint _v2 = _polyLines.getPointAtPercent((i+1) / float(_v.size())) * imageRatio;
-            
+                
                 ofPushMatrix();
-
+                
                 ofPoint _diffV = _v2 -_v1;
                 ofTranslate(_v1.x, _v1.y, 0);
                 
@@ -328,7 +344,9 @@ void ofApp::draw() {
     
     
     if (bDrawGui) {
+        ofPushMatrix();
         gui.draw();
+        ofPopMatrix();
     }
     
     
@@ -340,15 +358,15 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::drawTransImg(ofImage _img){
-
+    
     ofPushMatrix();
     
-    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0);
+    //    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0);
     
     ofImage _transImg;
-
+    
     _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
-
+    
     ofPixels & pix = _img.getPixels();
     ofPixels & pixT = _transImg.getPixels();
     int numPixels = pix.size();
@@ -366,13 +384,13 @@ void ofApp::drawTransImg(ofImage _img){
             pixT[i*4+3] = 0;
         }
     }
-
+    
     _transImg.update();
     _transImg.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
-
+    
     
     ofPopMatrix();
-
+    
 }
 
 
@@ -383,7 +401,7 @@ void ofApp::drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos){
     
     ofPushMatrix();
     
-    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5 + _pos.x, 0 + _pos.y);
+    //    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5 + _pos.x, 0 + _pos.y);
     
     ofImage _transImg;
     
@@ -408,6 +426,48 @@ void ofApp::drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos){
     
     _transImg.update();
     _transImg.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
+    
+    
+    ofPopMatrix();
+    
+}
+
+
+
+//--------------------------------------------------------------
+ofImage ofApp::drawTransColorImage(ofImage _img, ofColor _c, ofPoint _pos){
+    
+    ofPushMatrix();
+    
+    //    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5 + _pos.x, 0 + _pos.y);
+    
+    ofTranslate(_pos.x, _pos.y);
+    
+    ofImage _transImg;
+    
+    _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+    
+    ofPixels & pix = _img.getPixels();
+    ofPixels & pixT = _transImg.getPixels();
+    int numPixels = pix.size();
+    for(int i = 0; i < numPixels; i++) {
+        if(pix[i] > 200) {
+            pixT[i*4+0] = _c.r;
+            pixT[i*4+1] = _c.g;
+            pixT[i*4+2] = _c.b;
+            pixT[i*4+3] = _c.a;
+        } else {
+            pixT[i*4+0] = pix[i];
+            pixT[i*4+1] = pix[i];
+            pixT[i*4+2] = pix[i];
+            pixT[i*4+3] = 255;
+        }
+    }
+    
+    _transImg.resize(640 * imageRatio.x, 480 * imageRatio.y);
+    _transImg.update();
+    
+    return _transImg;
     
     
     ofPopMatrix();
@@ -420,30 +480,30 @@ void ofApp::drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos){
 //--------------------------------------------------------------
 void ofApp::drawTransShadowImg(ofImage _img){
     
-    ofImage _transSImg;
-    _transSImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+    //    ofImage _transSImg;
+    //    _transSImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+    //
+    //    ofPixels & pix = _img.getPixels();
+    //    ofPixels & pixST = _transSImg.getPixels();
+    //    int numPixels = pix.size();
+    //    for(int i = 0; i < numPixels; i++) {
+    //        if(pix[i] > 200) {
+    //            ofColor _c = shapeColor;
+    //            pixST[i*4+0] = _c.r;
+    //            pixST[i*4+1] = _c.g;
+    //            pixST[i*4+2] = _c.b;
+    //            pixST[i*4+3] = 120;
+    //        } else {
+    //            pixST[i*4+0] = pix[i];
+    //            pixST[i*4+1] = 125;
+    //            pixST[i*4+2] = 125;
+    //            pixST[i*4+3] = 0;
+    //        }
+    //    }
+    //
+    //    _transSImg.update();
+    //    _transSImg.draw(1.05 * 0.5, 1.05 * 0.5, ofGetWindowSize().x * 1.05, ofGetWindowSize().y * 1.05);
     
-    ofPixels & pix = _img.getPixels();
-    ofPixels & pixST = _transSImg.getPixels();
-    int numPixels = pix.size();
-    for(int i = 0; i < numPixels; i++) {
-        if(pix[i] > 200) {
-            ofColor _c = shapeColor;
-            pixST[i*4+0] = _c.r;
-            pixST[i*4+1] = _c.g;
-            pixST[i*4+2] = _c.b;
-            pixST[i*4+3] = 120;
-        } else {
-            pixST[i*4+0] = pix[i];
-            pixST[i*4+1] = 125;
-            pixST[i*4+2] = 125;
-            pixST[i*4+3] = 0;
-        }
-    }
-    
-    _transSImg.update();
-    _transSImg.draw(-kinectSizeOffSet * 1.05 * 0.5, -kinectSizeOffSet-kinectSizeOffSet * 1.05 * 0.5, (ofGetWindowSize().x + kinectSizeOffSet) * 1.05, (ofGetWindowSize().y + kinectSizeOffSet) * 1.05);
-
 }
 
 
@@ -503,66 +563,66 @@ void ofApp::recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args)
 void ofApp::keyPressed (int key) {
     
     switch (key) {
-
-        case 'f':
+            
+            case 'f':
             break;
-
-        case ' ':
+            
+            case ' ':
             bThreshWithOpenCV = !bThreshWithOpenCV;
             break;
             
-        case'p':
+            case'p':
             drawPointCloud.bDrawPointCloud = !drawPointCloud.bDrawPointCloud;
             break;
             
-        case '>':
-        case '.':
+            case '>':
+            case '.':
             farThreshold ++;
             if (farThreshold > 255) farThreshold = 255;
             break;
             
-        case '<':
-        case ',':
+            case '<':
+            case ',':
             farThreshold --;
             if (farThreshold < 0) farThreshold = 0;
             break;
             
-        case '+':
-        case '=':
+            case '+':
+            case '=':
             nearThreshold ++;
             if (nearThreshold > 255) nearThreshold = 255;
             break;
             
-        case '-':
+            case '-':
             nearThreshold --;
             if (nearThreshold < 0) nearThreshold = 0;
             break;
             
-        case 'w':
+            case 'w':
 #ifndef DEBUG_VIDEO
             kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
 #endif
             break;
             
-        case 'c':
+            case 'c':
             bContourDraw = !bContourDraw;
             break;
             
-        case 'l':
+            case 'l':
             drawPointCloud.bLinesPointCloud = !drawPointCloud.bLinesPointCloud;
             break;
             
-        case 'i':
+            case 'i':
             bInformation = !bInformation;
             bDrawGui = !bDrawGui;
             break;
             
-        case 'v':
+            case 'v':
             bCVDraw = !bCVDraw;
             break;
             
             
-        case OF_KEY_UP:
+            case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
 #ifndef DEBUG_VIDEO
@@ -570,7 +630,7 @@ void ofApp::keyPressed (int key) {
 #endif
             break;
             
-        case OF_KEY_DOWN:
+            case OF_KEY_DOWN:
             angle--;
             if(angle<-30) angle=-30;
 #ifndef DEBUG_VIDEO
@@ -579,6 +639,34 @@ void ofApp::keyPressed (int key) {
             break;
     }
     
+    
+    if (key == OF_KEY_UP)
+    {
+        if (blendMode >= 24)
+        {
+            blendMode = 0;
+        }
+        else {
+            blendMode++;
+        }
+    }
+    if (key == OF_KEY_DOWN)
+    {
+        if (blendMode <= 0)
+        {
+            blendMode = 24;
+        }
+        else
+        {
+            blendMode--;
+        }
+    }
+    if (key == ' ')
+    {
+        ofSaveFrame();
+    }
+    
+    
 }
 
 
@@ -586,7 +674,7 @@ void ofApp::keyPressed (int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
-
+    
 #ifndef DEBUG_VIDEO
     
     if(key=='r'){
@@ -613,7 +701,7 @@ void ofApp::keyReleased(int key){
     }
     
 #endif
-
+    
     
 }
 
@@ -657,14 +745,14 @@ void ofApp::windowResized(int w, int h) {
     imageRatio.y = ofGetWindowSize().y / kinect.getHeight();
     imageRatio.x = imageRatio.y;
 #endif
-
+    
 }
 
 
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-
+    
 #ifdef DEBUG_VIDEO
     
 #else
@@ -674,5 +762,5 @@ void ofApp::exit() {
     
     ofRemoveListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
     vidRecorder.close();
-
+    
 }

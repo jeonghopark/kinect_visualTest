@@ -6,11 +6,14 @@
 #include "ofxGui.h"
 #include "ofxCv.h"
 #include "ofxVideoRecorder.h"
+#include "ofxPSBlend.h"
 
 #include "ctmf.h"
 
 #include "DrawPointCloud.hpp"
 #include "DrawShape.hpp"
+
+
 
 using namespace milton;
 
@@ -60,6 +63,9 @@ public:
     void drawTransImg(ofImage _img);
     void drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos);
     void drawTransShadowImg(ofImage _img);
+
+    ofImage drawTransColorImage(ofImage _img, ofColor _c, ofPoint _pos);
+
     
     DrawShape drawShape;
     bool bDrawShape;
@@ -68,7 +74,6 @@ public:
     vector<ofImage> silhoutteImg;
     
     ofVec2f imageRatio;
-    int kinectSizeOffSet;
     
     ofxPanel gui;
     ofxLabel fpsView;
@@ -103,5 +108,8 @@ public:
     void recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args);
 
     
+    ofxPSBlend psBlend;
+    int blendMode;
+
     
 };
