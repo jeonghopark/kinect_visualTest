@@ -88,6 +88,8 @@ void ofApp::setup() {
 }
 
 
+
+
 //--------------------------------------------------------------
 void ofApp::changeColorButton(bool & t){
     
@@ -231,8 +233,8 @@ void ofApp::update() {
     
     ofPushMatrix();
     psBlend.begin();
-    //    drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0));
-    drawTransColorImage(medianFilteredResult, ofColor(255), ofPoint(0,0)).draw(0, 0);
+    drawTransImg(medianFilteredResult);
+    drawTransImg(medianFilteredResult);
     psBlend.end();
     ofPopMatrix();
     
@@ -259,10 +261,11 @@ void ofApp::draw() {
         //        drawTransImg(medianFilteredResult);
         //        drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0));
         
-        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0)).getTexture(), blendMode);
+        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
     }
     
     ofPopMatrix();
+    
     
     //    easyCam.begin();
     //    drawPointCloud.drawPointCloud(kinect, shapeColor);
@@ -273,12 +276,10 @@ void ofApp::draw() {
     //        drawShape.drawMovingLines(shapeColor);
     //    }
     
-    
     //    kinect.drawDepth(0, 0);
     
     //    medianFilteredResult.draw(0, 0);
     //    player.draw(0, 0);
-    
     
     
     if (finder.size()>0 && bContourDraw) {

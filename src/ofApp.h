@@ -14,7 +14,6 @@
 #include "DrawShape.hpp"
 
 
-
 using namespace milton;
 
 #define DEBUG_VIDEO
