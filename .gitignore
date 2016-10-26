@@ -17,5 +17,5 @@ bin/data/*/.DS_Store
 
 Makefile
 .gitkeep
-*.mov
+!*.mov
 .DS_Store
