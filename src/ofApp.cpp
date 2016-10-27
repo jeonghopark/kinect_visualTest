@@ -53,9 +53,10 @@ void ofApp::setup() {
     
     
     
-    bDrawGui = false;
+    bDrawGui = true;
     bCVDraw = true;
     bContourDraw = true;
+    bInformation = true;
     
     
     ofDirectory _dir;
