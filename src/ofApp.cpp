@@ -256,7 +256,7 @@ void ofApp::update() {
         ofClear(0, 0);
     }
     
-    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+    drawTransImgColor(medianFilteredResult, shapeColor);
     
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     ofPushMatrix();
@@ -264,19 +264,25 @@ void ofApp::update() {
     drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
     ofPopMatrix();
     
+    ofEnableBlendMode(OF_BLENDMODE_MULTIPLY);
     ofPushMatrix();
     ofTranslate(-100, 0);
     drawTransColorImage(medianFilteredResult, ofColor(0,0,255)).draw(0, 0);
     ofPopMatrix();
 
     
+    ofPushStyle();
     for (int j=0; j<finder.size(); j++) {
+        ofSetColor(255, 255, 0);
+        finder.getPolyline(j).draw();
         
         ofPushMatrix();
+        ofTranslate(-200, 0);
+        ofSetColor(255, 255, 0);
         finder.getPolyline(j).draw();
         ofPopMatrix();
-
     }
+    ofPopStyle();
     
     mainFbo.end();
  
