@@ -231,12 +231,12 @@ void ofApp::update() {
     
     //    drawShape.update();
     
-    ofPushMatrix();
-    psBlend.begin();
-    drawTransImg(medianFilteredResult);
-    drawTransImg(medianFilteredResult);
-    psBlend.end();
-    ofPopMatrix();
+//    ofPushMatrix();
+//    psBlend.begin();
+//    drawTransImg(medianFilteredResult);
+//    drawTransImg(medianFilteredResult);
+//    psBlend.end();
+//    ofPopMatrix();
     
 }
 
@@ -259,10 +259,13 @@ void ofApp::draw() {
     if (bCVDraw) {
         //        drawTransShadowImg(medianFilteredResult);
         //        drawTransImg(medianFilteredResult);
-        //        drawTransImgColor(medianFilteredResult, ofColor(255,0,0), ofPoint(-200,0));
         
-        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
+//        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
     }
+
+    
+    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+
     
     ofPopMatrix();
     
@@ -398,7 +401,7 @@ void ofApp::drawTransImg(ofImage _img){
 
 
 //--------------------------------------------------------------
-void ofApp::drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos){
+void ofApp::drawTransImgColor(ofImage _img, ofColor _c){
     
     ofPushMatrix();
     
@@ -432,6 +435,8 @@ void ofApp::drawTransImgColor(ofImage _img, ofColor _c, ofPoint _pos){
     ofPopMatrix();
     
 }
+
+
 
 
 
