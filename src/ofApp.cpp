@@ -18,7 +18,6 @@ void ofApp::setup() {
     bThreshWithOpenCV = true;
     
     mainFbo.allocate(640, 480);
-    colorFbo1.allocate(1280, 720);
     
 
     
@@ -244,6 +243,8 @@ void ofApp::update() {
 //    psBlend.end();
 //    ofPopMatrix();
     
+    
+    
     mainFbo.begin();
     
     if (delayBackground) {
@@ -268,6 +269,15 @@ void ofApp::update() {
     drawTransColorImage(medianFilteredResult, ofColor(0,0,255)).draw(0, 0);
     ofPopMatrix();
 
+    
+    for (int j=0; j<finder.size(); j++) {
+        
+        ofPushMatrix();
+        finder.getPolyline(j).draw();
+        ofPopMatrix();
+
+    }
+    
     mainFbo.end();
  
     
@@ -298,10 +308,10 @@ void ofApp::draw() {
 
     
 //    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+    mainFbo.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
 
     ofPopMatrix();
 
-    mainFbo.draw(0, 0);
 
 
     //    easyCam.begin();
@@ -328,11 +338,9 @@ void ofApp::draw() {
         ofSetRectMode(OF_RECTMODE_CENTER);
         
         ofSetColor(shapeColor);
+
         
         for (int j=0; j<finder.size(); j++) {
-            ofPushMatrix();
-            finder.getPolyline(j).draw();
-            ofPopMatrix();
             
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();

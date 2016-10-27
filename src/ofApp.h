@@ -114,6 +114,5 @@ public:
 
     
     ofFbo mainFbo;
-    ofFbo colorFbo1;
     
 };
