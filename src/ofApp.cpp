@@ -17,6 +17,10 @@ void ofApp::setup() {
     angle = 20;
     bThreshWithOpenCV = true;
     
+    mainFbo.allocate(640, 480);
+    colorFbo1.allocate(1280, 720);
+    
+
     
     
 #ifdef DEBUG_VIDEO
@@ -50,6 +54,7 @@ void ofApp::setup() {
     gui.add(backGroundColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(shapeColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(delayBackground.setup("Delay Silhouette", false));
     
     
     
@@ -239,6 +244,33 @@ void ofApp::update() {
 //    psBlend.end();
 //    ofPopMatrix();
     
+    mainFbo.begin();
+    
+    if (delayBackground) {
+        ofPushStyle();
+        ofSetColor(0, 5);
+        ofDrawRectangle(0, 0, 1280, 720);
+        ofPopStyle();
+    } else {
+        ofClear(0, 0);
+    }
+    
+    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+    
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    ofPushMatrix();
+    ofTranslate(-200, 0);
+    drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
+    ofPopMatrix();
+    
+    ofPushMatrix();
+    ofTranslate(-100, 0);
+    drawTransColorImage(medianFilteredResult, ofColor(0,0,255)).draw(0, 0);
+    ofPopMatrix();
+
+    mainFbo.end();
+ 
+    
 }
 
 
@@ -265,12 +297,13 @@ void ofApp::draw() {
     }
 
     
-    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+//    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
 
-    
     ofPopMatrix();
-    
-    
+
+    mainFbo.draw(0, 0);
+
+
     //    easyCam.begin();
     //    drawPointCloud.drawPointCloud(kinect, shapeColor);
     //    drawPointCloud.drawLinesCloud(kinect, shapeColor);
@@ -298,7 +331,6 @@ void ofApp::draw() {
         
         for (int j=0; j<finder.size(); j++) {
             ofPushMatrix();
-            ofScale(0, 0, 0);
             finder.getPolyline(j).draw();
             ofPopMatrix();
             
@@ -391,12 +423,15 @@ void ofApp::drawTransImg(ofImage _img){
     }
     
     _transImg.update();
-    _transImg.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
+    _transImg.draw(0, 0, 640, 480);
     
     
     ofPopMatrix();
     
 }
+
+
+
 
 
 
@@ -430,7 +465,7 @@ void ofApp::drawTransImgColor(ofImage _img, ofColor _c){
     }
     
     _transImg.update();
-    _transImg.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
+    _transImg.draw(0, 0, 640, 480);
     
     
     ofPopMatrix();
@@ -442,16 +477,12 @@ void ofApp::drawTransImgColor(ofImage _img, ofColor _c){
 
 
 //--------------------------------------------------------------
-ofImage ofApp::drawTransColorImage(ofImage _img, ofColor _c, ofPoint _pos){
+ofImage ofApp::drawTransColorImage(ofImage _img, ofColor _c){
     
-    ofPushMatrix();
     
     //    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5 + _pos.x, 0 + _pos.y);
     
-    ofTranslate(_pos.x, _pos.y);
-    
     ofImage _transImg;
-    
     _transImg.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
     
     ofPixels & pix = _img.getPixels();
@@ -464,20 +495,17 @@ ofImage ofApp::drawTransColorImage(ofImage _img, ofColor _c, ofPoint _pos){
             pixT[i*4+2] = _c.b;
             pixT[i*4+3] = _c.a;
         } else {
-            pixT[i*4+0] = pix[i];
-            pixT[i*4+1] = pix[i];
-            pixT[i*4+2] = pix[i];
-            pixT[i*4+3] = 255;
+            pixT[i*4+0] = 0;
+            pixT[i*4+1] = 0;
+            pixT[i*4+2] = 0;
+            pixT[i*4+3] = 0;
         }
     }
     
-    _transImg.resize(640 * imageRatio.x, 480 * imageRatio.y);
     _transImg.update();
     
     return _transImg;
     
-    
-    ofPopMatrix();
     
 }
 

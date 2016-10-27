@@ -63,7 +63,8 @@ public:
     void drawTransImgColor(ofImage _img, ofColor _c);
     void drawTransShadowImg(ofImage _img);
 
-    ofImage drawTransColorImage(ofImage _img, ofColor _c, ofPoint _pos);
+
+    ofImage drawTransColorImage(ofImage _img, ofColor _c);
 
     
     DrawShape drawShape;
@@ -82,6 +83,7 @@ public:
     ofxIntSlider ctmffilterValue;
     ofxIntSlider threshold;
     ofxToggle invertColor;
+    ofxToggle delayBackground;
     
     bool bDrawGui;
     
@@ -110,5 +112,8 @@ public:
     ofxPSBlend psBlend;
     int blendMode;
 
+    
+    ofFbo mainFbo;
+    ofFbo colorFbo1;
     
 };
