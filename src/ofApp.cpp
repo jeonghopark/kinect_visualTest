@@ -335,7 +335,7 @@ void ofApp::draw() {
     //    player.draw(0, 0);
     
     
-    if (finder.size()>0 && bContourDraw) {
+    if (finder.size() > 0 && bContourDraw) {
         ofPushMatrix();
         
         ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
@@ -371,7 +371,7 @@ void ofApp::draw() {
                 ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
                 
                 ofPushStyle();
-                ofSetColor(smallFigureColor);
+                ofSetColor(shapeColor);
                 silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
                 
                 ofPopStyle();
