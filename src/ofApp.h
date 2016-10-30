@@ -86,6 +86,9 @@ public:
     ofxIntSlider threshold;
     ofxToggle invertColor;
     ofxToggle delayBackground;
+    ofxToggle bCaptureSilhoutte;
+    ofxToggle bContourImage;
+    
     
     bool bDrawGui;
     
@@ -118,5 +121,11 @@ public:
     ofFbo mainFbo;
     
     void drawSmallFigure();
+    
+    vector<ofImage> captureSilhoutteImg;
+    ofImage savedImg;
+    ofImage loadCaptureImg;
+    bool bImgBuffer;
+    
     
 };

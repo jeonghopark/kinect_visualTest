@@ -51,9 +51,11 @@ void ofApp::setup() {
     gui.add(threshold.setup("Threshold", 15, 0, 255));
     gui.add(invertColor.setup("Invert Color", false));
     gui.add(backGroundColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(shapeColor.setup("Shape Color", ofColor(255, 0, 0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(shapeColor.setup("Shape Color", ofColor(255, 255, 255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(delayBackground.setup("Delay Silhouette", false));
+    gui.add(bCaptureSilhoutte.setup("Capture Silhouette", false));
+    gui.add(bContourImage.setup("Capture Silhouette", false));
     
     
     
@@ -76,6 +78,7 @@ void ofApp::setup() {
     graypixels = new unsigned char[640*480];
     medianFiltered = new unsigned char[640*480];
     medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
+    savedImg.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     
     invertColor.addListener(this, &ofApp::changeColorButton);
     
@@ -245,10 +248,22 @@ void ofApp::update() {
     
     
     
+    if (bCaptureSilhoutte && (ofGetFrameNum() % 30 == 0)) {
+        captureSilhoutteImg.push_back(medianFilteredResult);
+        if (captureSilhoutteImg.size() > 5) {
+            captureSilhoutteImg.erase(captureSilhoutteImg.begin());
+        }
+        savedImg = medianFilteredResult;
+        string fileName = "snapshot_"+ofToString(10000)+".png";
+        savedImg.save(fileName);
+        loadCaptureImg.load(fileName);
+    }
+    
+    
     mainFbo.begin();
     
     ofPushMatrix();
-
+    
     ofTranslate((854 - 640) * 0.5, 0);
     
     if (delayBackground) {
@@ -263,23 +278,50 @@ void ofApp::update() {
     
     int _offsetX = 120;
     
-//    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    if (!bCaptureSilhoutte) {
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        ofPushMatrix();
+        ofTranslate(-_offsetX, 0);
+        drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
+        ofPopMatrix();
+        //
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        ofPushMatrix();
+        ofTranslate(_offsetX, 0);
+        drawTransColorImage(medianFilteredResult, ofColor(0,0,255)).draw(0, 0);
+        ofPopMatrix();
+    }
+    
+    
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
     ofPushMatrix();
-    ofTranslate(-_offsetX, 0);
-    drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
-    ofPopMatrix();
-//
-//    //    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    ofPushMatrix();
+    ofTranslate(0, 0);
+    drawTransColorImage(savedImg, ofColor(0,0,255,220)).draw(0, 0);
     ofTranslate(_offsetX, 0);
-    drawTransColorImage(medianFilteredResult, ofColor(255,0,255)).draw(0, 0);
+    drawTransColorImage(savedImg, ofColor(255,0,255,220)).draw(0, 0);
+    ofTranslate(-_offsetX*2, 0);
+    drawTransColorImage(savedImg, ofColor(255,0,255,220)).draw(0, 0);
     ofPopMatrix();
+    
+    
+    if (bCaptureSilhoutte) {
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        ofPushMatrix();
+        ofTranslate(0, 0);
+        if (bCaptureSilhoutte && captureSilhoutteImg.size() > 4) {
+            drawTransColorImage(captureSilhoutteImg[1], ofColor(0,0,255,220)).draw(0, 0);
+            drawTransColorImage(captureSilhoutteImg[2], ofColor(0,0,255,220)).draw(-_offsetX, 0);
+            drawTransColorImage(captureSilhoutteImg[3], ofColor(0,0,255,220)).draw(_offsetX, 0);
+            
+        }
+        ofPopMatrix();
+    }
     
     
     drawTransColorImage(medianFilteredResult, shapeColor).draw(0, 0);
     
     
-    if (!delayBackground) {
+    if (bContourImage) {
         ofPushStyle();
         for (int j=0; j<finder.size(); j++) {
             ofSetColor(255, 255, 0, 200);
@@ -305,7 +347,7 @@ void ofApp::update() {
     drawSmallFigure();
     
     ofPopMatrix();
-
+    
     mainFbo.end();
     
     
@@ -324,7 +366,7 @@ void ofApp::draw() {
     
     ofPushMatrix();
     
-//    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
+    //    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
     
     if (bCVDraw) {
         //        drawTransShadowImg(medianFilteredResult);
@@ -382,7 +424,6 @@ void ofApp::drawSmallFigure(){
     if (finder.size() > 0 && bContourDraw) {
         ofPushMatrix();
         
-        //        ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
         
         ofPushStyle();
         ofSetRectMode(OF_RECTMODE_CENTER);
@@ -395,7 +436,7 @@ void ofApp::drawSmallFigure(){
             ofPolyline _polyLines = finder.getPolyline(j);
             vector<glm::vec3> _v = _polyLines.getVertices();
             
-            int _step = 10;
+            int _step = 15;
             float _ratioSize = 0.15;
             
             for (int i=0; i<_v.size()-1; i+=_step) {
@@ -409,16 +450,30 @@ void ofApp::drawSmallFigure(){
                 ofTranslate(_v1.x, _v1.y, 0);
                 
                 float _degree = atan2(_diffV.y, _diffV.x);
+                
+                //                ofTranslate(-img.getWidth() * _ratioSize * 0.5, 0, 0);
+                
                 ofRotateZDeg(ofRadToDeg(_degree) + 180);
                 
                 int _index = 5;
-                ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
+                //                ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
+                //
+                //                ofPushStyle();
+                //                ofSetColor(shapeColor);
+                //                silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                //
+                //                ofPopStyle();
+                
+                
+                ofTranslate(0, -savedImg.getHeight() * _ratioSize * 0.5, 0);
                 
                 ofPushStyle();
                 ofSetColor(shapeColor);
-                silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                savedImg.draw(0, 0, 0, savedImg.getWidth() * _ratioSize, savedImg.getHeight() * _ratioSize);
                 
                 ofPopStyle();
+                
+                
                 
                 //                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
                 
@@ -431,7 +486,7 @@ void ofApp::drawSmallFigure(){
         ofPopStyle();
         ofPopMatrix();
     }
-
+    
     
 }
 
@@ -780,6 +835,16 @@ void ofApp::keyReleased(int key){
     }
     
 #endif
+    
+    
+    if (key=='m') {
+        //        captureSilhoutteImg.push_back(medianFilteredResult);
+        savedImg = medianFilteredResult;
+        string fileName = "snapshot_"+ofToString(10000)+".png";
+        savedImg.save(fileName);
+        loadCaptureImg.load(fileName);
+        bImgBuffer = true;
+    }
     
     
 }
