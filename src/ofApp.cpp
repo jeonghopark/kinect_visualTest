@@ -17,9 +17,9 @@ void ofApp::setup() {
     angle = 20;
     bThreshWithOpenCV = true;
     
-    mainFbo.allocate(640, 480);
+    mainFbo.allocate(854, 480);
     
-
+    
     
     
 #ifdef DEBUG_VIDEO
@@ -39,7 +39,7 @@ void ofApp::setup() {
 #endif
     
     
-    psBlend.setup(player.getHeight() * imageRatio.x, player.getWidth() * imageRatio.y);
+    //    psBlend.setup(player.getHeight() * imageRatio.x, player.getWidth() * imageRatio.y);
     blendMode = 0;
     
     drawShape.setup(20);
@@ -51,7 +51,7 @@ void ofApp::setup() {
     gui.add(threshold.setup("Threshold", 15, 0, 255));
     gui.add(invertColor.setup("Invert Color", false));
     gui.add(backGroundColor.setup("Background Color", ofColor(0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
-    gui.add(shapeColor.setup("Shape Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
+    gui.add(shapeColor.setup("Shape Color", ofColor(255, 0, 0, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(delayBackground.setup("Delay Silhouette", false));
     
@@ -80,7 +80,7 @@ void ofApp::setup() {
     invertColor.addListener(this, &ofApp::changeColorButton);
     
     
-    fileName = "debugMovie";
+    fileName = "dataMovies/debugMovie";
     fileExt = ".mov";
     vidRecorder.setVideoCodec("mpeg4");
     vidRecorder.setVideoBitrate("800k");
@@ -236,12 +236,12 @@ void ofApp::update() {
     
     //    drawShape.update();
     
-//    ofPushMatrix();
-//    psBlend.begin();
-//    drawTransImg(medianFilteredResult);
-//    drawTransImg(medianFilteredResult);
-//    psBlend.end();
-//    ofPopMatrix();
+    //    ofPushMatrix();
+    //    psBlend.begin();
+    //    drawTransImg(medianFilteredResult);
+    //    drawTransImg(medianFilteredResult);
+    //    psBlend.end();
+    //    ofPopMatrix();
     
     
     
@@ -256,36 +256,103 @@ void ofApp::update() {
         ofClear(0, 0);
     }
     
-    drawTransImgColor(medianFilteredResult, shapeColor);
+    
+    int _offsetX = 120;
     
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     ofPushMatrix();
-    ofTranslate(-200, 0);
+    ofTranslate(_offsetX, 0);
     drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
     ofPopMatrix();
     
-    ofEnableBlendMode(OF_BLENDMODE_MULTIPLY);
+    //    ofEnableBlendMode(OF_BLENDMODE_ADD);
     ofPushMatrix();
-    ofTranslate(-100, 0);
+    ofTranslate(-_offsetX, 0);
     drawTransColorImage(medianFilteredResult, ofColor(0,0,255)).draw(0, 0);
     ofPopMatrix();
-
+    
+    
+    drawTransColorImage(medianFilteredResult, shapeColor).draw(0, 0);
     
     ofPushStyle();
     for (int j=0; j<finder.size(); j++) {
-        ofSetColor(255, 255, 0);
+        ofSetColor(255, 255, 0, 200);
         finder.getPolyline(j).draw();
         
         ofPushMatrix();
-        ofTranslate(-200, 0);
-        ofSetColor(255, 255, 0);
+        ofTranslate(-_offsetX, 0);
+        ofSetColor(255, 255, 0, 200);
         finder.getPolyline(j).draw();
         ofPopMatrix();
+        
+        ofPushMatrix();
+        ofTranslate(_offsetX, 0);
+        ofSetColor(255, 255, 0, 200);
+        finder.getPolyline(j).draw();
+        ofPopMatrix();
+        
     }
     ofPopStyle();
     
+    
+    
+    if (finder.size() > 0 && bContourDraw) {
+        ofPushMatrix();
+        
+        //        ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
+        
+        ofPushStyle();
+        ofSetRectMode(OF_RECTMODE_CENTER);
+        
+        ofSetColor(shapeColor);
+        
+        
+        for (int j=0; j<finder.size(); j++) {
+            
+            ofPolyline _polyLines = finder.getPolyline(j);
+            vector<glm::vec3> _v = _polyLines.getVertices();
+            
+            int _step = 10;
+            float _ratioSize = 0.15;
+            
+            for (int i=0; i<_v.size()-1; i+=_step) {
+                
+                ofPoint _v1 = _polyLines.getPointAtPercent(i / float(_v.size()));
+                ofPoint _v2 = _polyLines.getPointAtPercent((i+1) / float(_v.size()));
+                
+                ofPushMatrix();
+                
+                ofPoint _diffV = _v2 -_v1;
+                ofTranslate(_v1.x, _v1.y, 0);
+                
+                float _degree = atan2(_diffV.y, _diffV.x);
+                ofRotateZDeg(ofRadToDeg(_degree) + 180);
+                
+                int _index = 5;
+                ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
+                
+                ofPushStyle();
+                ofSetColor(shapeColor);
+                silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
+                
+                ofPopStyle();
+                
+                //                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
+                
+                ofPopMatrix();
+                
+            }
+            
+        }
+        
+        ofPopStyle();
+        ofPopMatrix();
+    }
+    
+    
+    
     mainFbo.end();
- 
+    
     
 }
 
@@ -309,17 +376,17 @@ void ofApp::draw() {
         //        drawTransShadowImg(medianFilteredResult);
         //        drawTransImg(medianFilteredResult);
         
-//        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
+        //        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
     }
-
     
-//    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
-    mainFbo.draw(0, 0, 640 * imageRatio.x, 480 * imageRatio.y);
-
+    
+    //    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+    mainFbo.draw(0, 0, 854 * imageRatio.x, 480 * imageRatio.y);
+    
     ofPopMatrix();
-
-
-
+    
+    
+    
     //    easyCam.begin();
     //    drawPointCloud.drawPointCloud(kinect, shapeColor);
     //    drawPointCloud.drawLinesCloud(kinect, shapeColor);
@@ -335,58 +402,6 @@ void ofApp::draw() {
     //    player.draw(0, 0);
     
     
-    if (finder.size()>0 && bContourDraw) {
-        ofPushMatrix();
-        
-        ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
-        
-        ofPushStyle();
-        ofSetRectMode(OF_RECTMODE_CENTER);
-        
-        ofSetColor(shapeColor);
-
-        
-        for (int j=0; j<finder.size(); j++) {
-            
-            ofPolyline _polyLines = finder.getPolyline(j);
-            vector<glm::vec3> _v = _polyLines.getVertices();
-            
-            int _step = 10;
-            float _ratioSize = 0.25;
-            
-            for (int i=0; i<_v.size()-1; i+=_step) {
-                
-                ofPoint _v1 = _polyLines.getPointAtPercent(i / float(_v.size())) * imageRatio;
-                ofPoint _v2 = _polyLines.getPointAtPercent((i+1) / float(_v.size())) * imageRatio;
-                
-                ofPushMatrix();
-                
-                ofPoint _diffV = _v2 -_v1;
-                ofTranslate(_v1.x, _v1.y, 0);
-                
-                float _degree = atan2(_diffV.y, _diffV.x);
-                ofRotateZDeg(ofRadToDeg(_degree) + 180);
-                
-                int _index = 5;
-                ofTranslate(-silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5, 0);
-                
-                ofPushStyle();
-                ofSetColor(smallFigureColor);
-                silhoutteImg[_index].draw(0, 0, 0, silhoutteImg[_index].getWidth() * _ratioSize, silhoutteImg[_index].getHeight() * _ratioSize);
-                
-                ofPopStyle();
-                
-                //                ofDrawBitmapString(ofToString(ofRadToDeg(_degree) + 180), -silhoutteImg[_index].getWidth() * _ratioSize * 0.5, -silhoutteImg[_index].getHeight() * _ratioSize * 0.5);
-                
-                ofPopMatrix();
-                
-            }
-            
-        }
-        
-        ofPopStyle();
-        ofPopMatrix();
-    }
     
     
     if (bInformation){
@@ -613,65 +628,65 @@ void ofApp::keyPressed (int key) {
     
     switch (key) {
             
-            case 'f':
+        case 'f':
             break;
             
-            case ' ':
+        case ' ':
             bThreshWithOpenCV = !bThreshWithOpenCV;
             break;
             
-            case'p':
+        case'p':
             drawPointCloud.bDrawPointCloud = !drawPointCloud.bDrawPointCloud;
             break;
             
-            case '>':
-            case '.':
+        case '>':
+        case '.':
             farThreshold ++;
             if (farThreshold > 255) farThreshold = 255;
             break;
             
-            case '<':
-            case ',':
+        case '<':
+        case ',':
             farThreshold --;
             if (farThreshold < 0) farThreshold = 0;
             break;
             
-            case '+':
-            case '=':
+        case '+':
+        case '=':
             nearThreshold ++;
             if (nearThreshold > 255) nearThreshold = 255;
             break;
             
-            case '-':
+        case '-':
             nearThreshold --;
             if (nearThreshold < 0) nearThreshold = 0;
             break;
             
-            case 'w':
+        case 'w':
 #ifndef DEBUG_VIDEO
             kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
 #endif
             break;
             
-            case 'c':
+        case 'c':
             bContourDraw = !bContourDraw;
             break;
             
-            case 'l':
+        case 'l':
             drawPointCloud.bLinesPointCloud = !drawPointCloud.bLinesPointCloud;
             break;
             
-            case 'i':
+        case 'i':
             bInformation = !bInformation;
             bDrawGui = !bDrawGui;
             break;
             
-            case 'v':
+        case 'v':
             bCVDraw = !bCVDraw;
             break;
             
             
-            case OF_KEY_UP:
+        case OF_KEY_UP:
             angle++;
             if(angle>30) angle=30;
 #ifndef DEBUG_VIDEO
@@ -679,7 +694,7 @@ void ofApp::keyPressed (int key) {
 #endif
             break;
             
-            case OF_KEY_DOWN:
+        case OF_KEY_DOWN:
             angle--;
             if(angle<-30) angle=-30;
 #ifndef DEBUG_VIDEO
