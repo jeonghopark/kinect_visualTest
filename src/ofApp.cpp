@@ -247,10 +247,14 @@ void ofApp::update() {
     
     mainFbo.begin();
     
+    ofPushMatrix();
+
+    ofTranslate((854 - 640) * 0.5, 0);
+    
     if (delayBackground) {
         ofPushStyle();
         ofSetColor(0, 5);
-        ofDrawRectangle(0, 0, 1280, 720);
+        ofDrawRectangle(0, 0, 854, 480);
         ofPopStyle();
     } else {
         ofClear(0, 0);
@@ -259,42 +263,121 @@ void ofApp::update() {
     
     int _offsetX = 120;
     
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    ofPushMatrix();
-    ofTranslate(_offsetX, 0);
-    drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
-    ofPopMatrix();
-    
-    //    ofEnableBlendMode(OF_BLENDMODE_ADD);
+//    ofEnableBlendMode(OF_BLENDMODE_ADD);
     ofPushMatrix();
     ofTranslate(-_offsetX, 0);
-    drawTransColorImage(medianFilteredResult, ofColor(0,0,255)).draw(0, 0);
+    drawTransColorImage(medianFilteredResult, ofColor(0,255,255)).draw(0, 0);
+    ofPopMatrix();
+//
+//    //    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    ofPushMatrix();
+    ofTranslate(_offsetX, 0);
+    drawTransColorImage(medianFilteredResult, ofColor(255,0,255)).draw(0, 0);
     ofPopMatrix();
     
     
     drawTransColorImage(medianFilteredResult, shapeColor).draw(0, 0);
     
-    ofPushStyle();
-    for (int j=0; j<finder.size(); j++) {
-        ofSetColor(255, 255, 0, 200);
-        finder.getPolyline(j).draw();
-        
-        ofPushMatrix();
-        ofTranslate(-_offsetX, 0);
-        ofSetColor(255, 255, 0, 200);
-        finder.getPolyline(j).draw();
-        ofPopMatrix();
-        
-        ofPushMatrix();
-        ofTranslate(_offsetX, 0);
-        ofSetColor(255, 255, 0, 200);
-        finder.getPolyline(j).draw();
-        ofPopMatrix();
-        
+    
+    if (!delayBackground) {
+        ofPushStyle();
+        for (int j=0; j<finder.size(); j++) {
+            ofSetColor(255, 255, 0, 200);
+            finder.getPolyline(j).draw();
+            
+            ofPushMatrix();
+            ofTranslate(-_offsetX, 0);
+            ofSetColor(255, 255, 0, 200);
+            finder.getPolyline(j).draw();
+            ofPopMatrix();
+            
+            ofPushMatrix();
+            ofTranslate(_offsetX, 0);
+            ofSetColor(255, 255, 0, 200);
+            finder.getPolyline(j).draw();
+            ofPopMatrix();
+            
+        }
+        ofPopStyle();
     }
-    ofPopStyle();
     
     
+    drawSmallFigure();
+    
+    ofPopMatrix();
+
+    mainFbo.end();
+    
+    
+}
+
+
+
+
+
+//--------------------------------------------------------------
+void ofApp::draw() {
+    
+    
+    ofBackground(backGroundColor);
+    
+    
+    ofPushMatrix();
+    
+//    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
+    
+    if (bCVDraw) {
+        //        drawTransShadowImg(medianFilteredResult);
+        //        drawTransImg(medianFilteredResult);
+        
+        //        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
+    }
+    
+    
+    //    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
+    mainFbo.draw(0, 0, 854 * imageRatio.x, 480 * imageRatio.y);
+    
+    ofPopMatrix();
+    
+    
+    
+    //    easyCam.begin();
+    //    drawPointCloud.drawPointCloud(kinect, shapeColor);
+    //    drawPointCloud.drawLinesCloud(kinect, shapeColor);
+    //    easyCam.end();
+    
+    //    if (bDrawShape) {
+    //        drawShape.drawMovingLines(shapeColor);
+    //    }
+    
+    //    kinect.drawDepth(0, 0);
+    
+    //    medianFilteredResult.draw(0, 0);
+    //    player.draw(0, 0);
+    
+    
+    
+    
+    if (bInformation){
+        information();
+    }
+    
+    
+    if (bDrawGui) {
+        ofPushMatrix();
+        gui.draw();
+        ofPopMatrix();
+    }
+    
+    
+}
+
+
+
+
+
+//--------------------------------------------------------------
+void ofApp::drawSmallFigure(){
     
     if (finder.size() > 0 && bContourDraw) {
         ofPushMatrix();
@@ -348,77 +431,9 @@ void ofApp::update() {
         ofPopStyle();
         ofPopMatrix();
     }
-    
-    
-    
-    mainFbo.end();
-    
+
     
 }
-
-
-
-
-
-//--------------------------------------------------------------
-void ofApp::draw() {
-    
-    
-    ofBackground(backGroundColor);
-    
-    
-    
-    ofPushMatrix();
-    
-    ofTranslate( ofGetWidth() * 0.5 - 640 * imageRatio.x * 0.5, 0 );
-    
-    if (bCVDraw) {
-        //        drawTransShadowImg(medianFilteredResult);
-        //        drawTransImg(medianFilteredResult);
-        
-        //        psBlend.draw(drawTransColorImage(medianFilteredResult, ofColor(255,0,0), ofPoint(0,0)).getTexture(), blendMode);
-    }
-    
-    
-    //    drawTransImgColor(medianFilteredResult, ofColor(255,0,0));
-    mainFbo.draw(0, 0, 854 * imageRatio.x, 480 * imageRatio.y);
-    
-    ofPopMatrix();
-    
-    
-    
-    //    easyCam.begin();
-    //    drawPointCloud.drawPointCloud(kinect, shapeColor);
-    //    drawPointCloud.drawLinesCloud(kinect, shapeColor);
-    //    easyCam.end();
-    
-    //    if (bDrawShape) {
-    //        drawShape.drawMovingLines(shapeColor);
-    //    }
-    
-    //    kinect.drawDepth(0, 0);
-    
-    //    medianFilteredResult.draw(0, 0);
-    //    player.draw(0, 0);
-    
-    
-    
-    
-    if (bInformation){
-        information();
-    }
-    
-    
-    if (bDrawGui) {
-        ofPushMatrix();
-        gui.draw();
-        ofPopMatrix();
-    }
-    
-    
-}
-
-
 
 
 

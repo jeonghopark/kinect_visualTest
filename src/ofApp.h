@@ -14,9 +14,11 @@
 #include "DrawShape.hpp"
 
 
-using namespace milton;
+#define DEBUG_VIDEO
 
-//#define DEBUG_VIDEO
+
+
+using namespace milton;
 
 
 class ofApp : public ofBaseApp {
@@ -115,5 +117,6 @@ public:
     
     ofFbo mainFbo;
     
+    void drawSmallFigure();
     
 };
