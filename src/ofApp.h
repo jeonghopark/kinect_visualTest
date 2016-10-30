@@ -16,7 +16,7 @@
 
 using namespace milton;
 
-#define DEBUG_VIDEO
+//#define DEBUG_VIDEO
 
 
 class ofApp : public ofBaseApp {

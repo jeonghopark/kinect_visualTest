@@ -19,4 +19,4 @@ Makefile
 .gitkeep
 !*.mov
 .DS_Store
-*.mov
+dataMovies
