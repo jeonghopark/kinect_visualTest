@@ -19,7 +19,7 @@ void ofApp::setup() {
     
     mainFbo.allocate(854, 480);
     
-    
+    snapCounter = 0;
     
     
 #ifdef DEBUG_VIDEO
@@ -55,7 +55,7 @@ void ofApp::setup() {
     gui.add(smallFigureColor.setup("Small Figure Color", ofColor(255, 255), ofColor(0, 0, 0, 0), ofColor(255, 255, 255, 255)));
     gui.add(delayBackground.setup("Delay Silhouette", false));
     gui.add(bCaptureSilhoutte.setup("Capture Silhouette", false));
-    gui.add(bContourImage.setup("Capture Silhouette", false));
+    gui.add(bContourImage.setup("Draw Contour", false));
     
     
     
@@ -79,7 +79,7 @@ void ofApp::setup() {
     medianFiltered = new unsigned char[640*480];
     medianFilteredResult.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     savedImg.allocate(640, 480, OF_IMAGE_GRAYSCALE);
-    
+    savedImgTrans.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     invertColor.addListener(this, &ofApp::changeColorButton);
     
     
@@ -253,10 +253,20 @@ void ofApp::update() {
         if (captureSilhoutteImg.size() > 5) {
             captureSilhoutteImg.erase(captureSilhoutteImg.begin());
         }
+        snapCounter++;
+        
+        
+        invertImage = medianFilteredResult;
+        invertImage.invert();
+        savedImgTrans.setFromPixels(invertImage.getPixels().getData(), 640, 480, OF_IMAGE_GRAYSCALE);
+        string fileName = "dataMovies/snapshot/snapshot_"+ofToString(snapCounter % 10)+".png";
+        savedImgTrans.save(fileName);
+        
         savedImg = medianFilteredResult;
-        string fileName = "snapshot_"+ofToString(10000)+".png";
-        savedImg.save(fileName);
-        loadCaptureImg.load(fileName);
+        string fileNameLocal = "snapshot_"+ofToString(snapCounter % 10)+".png";
+        savedImg.save(fileNameLocal);
+        savedImg.load(fileNameLocal);
+
     }
     
     
