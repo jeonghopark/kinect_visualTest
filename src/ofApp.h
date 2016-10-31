@@ -7,6 +7,8 @@
 #include "ofxCv.h"
 #include "ofxVideoRecorder.h"
 #include "ofxPSBlend.h"
+#include "ofxTonic.h"
+
 
 #include "ctmf.h"
 
@@ -18,10 +20,15 @@
 
 
 
+using namespace Tonic;
 using namespace milton;
 
 
 class ofApp : public ofBaseApp {
+    
+    ofxTonicSynth synth;
+
+    
 public:
     
     void setup();
@@ -133,4 +140,11 @@ public:
     int snapCounter;
     
     
+    void audioRequested(float * output, int bufferSize, int nChannels);
+    ofSoundStream soundStream;
+    float amountModGui;
+    float amountFQGui;
+    float thresholdInput;
+    float mainFq;
+
 };

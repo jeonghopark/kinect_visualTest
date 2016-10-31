@@ -92,7 +92,41 @@ void ofApp::setup() {
     ofAddListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
     bRecording = false;
     
+ 
     
+    
+    //
+    
+    mainFq = 0.1;
+    amountModGui = 1;
+    amountFQGui = 3.048;
+    thresholdInput = 17.5;
+
+    
+    soundStream.setup(this, 2, 0, 44100, 512, 4);
+    
+    // Parameter
+    ControlParameter triggerPitch = synth.addParameter("triggerPitch");
+    ControlParameter amountMod = synth.addParameter("amountMod");
+    ControlParameter amountFQ = synth.addParameter("amountFQ");
+    ControlParameter envelopTrigger = synth.addParameter("trigger");
+    
+    // Main Fq
+    Generator mainFq = ControlMidiToFreq().input(triggerPitch).smoothed();
+    
+    // Modulation Fq
+    Generator rModFq     = mainFq * amountFQ;
+    Generator modulation = SineWave().freq( rModFq ) * rModFq * amountMod;
+    
+    // Tone Generator
+    Generator tone = SineWave().freq(mainFq + modulation);
+    
+    // Envelop Generator
+    Generator env = ADSR().attack(0.001).decay(0.5).sustain(0).release(0).trigger(envelopTrigger).legato(false);
+    
+    // Output
+    synth.setOutputGen( tone * env * 0.75 );
+
 }
 
 
@@ -172,7 +206,15 @@ void ofApp::update() {
         //
         //
         //        contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
+     
+
+        ofPoint _p = ofPoint(finder.getCenter(0).x, finder.getCenter(0).y);
         
+        float _amountModGuiSensor = abs(ofMap(_p.x, 0, 640, -30, 30));
+        synth.setParameter( "amountMod", _amountModGuiSensor );
+        float _amountFQGuiSensor = abs(ofMap(_p.y, 0, 480, -30, 30));
+        synth.setParameter( "amountFQ", _amountFQGuiSensor );
+
     }
     
     
@@ -918,3 +960,18 @@ void ofApp::exit() {
     vidRecorder.close();
     
 }
+
+
+
+//--------------------------------------------------------------
+void ofApp::audioRequested (float * output, int bufferSize, int nChannels){
+    
+    //    for (int i = 0; i < bufferSize; i++){
+    //        output[i*nChannels    ] = ofMap(ard.getAnalog(0),0,1023,0,1) * 0.9;
+    //        output[i*nChannels + 1] = ofMap(ard.getAnalog(0),0,1023,0,1) * 0.9;
+    //    }
+    
+    synth.fillBufferOfFloats(output, bufferSize, nChannels);
+    
+}
+
